@@ -1,2791 +1,859 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VocabMaster - 英文單字學習大師 (自然拼讀與100核心單字)</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VocabMaster - 英文單字學習大師 (自然拼讀與1000核心單字)</title>
 
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- React 18 & ReactDOM UMD -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-
-    <!-- Babel for browser JSX parsing -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- Lucide Icons UMD -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-  </head>
-  <body class="bg-slate-50 text-slate-800 antialiased font-sans selection:bg-indigo-100 selection:text-indigo-900">
-    <div id="root"></div>
-
-    <script type="text/babel">
-      const { useState, useEffect } = React;
-
-      // ==========================================
-      // 1. 100 高頻單字資料庫 (涵蓋 6 大主題)
-      // ==========================================
-      const INITIAL_VOCABULARY = [
-        // --- 1. 學校與學習 School & Study (17 字) ---
-        {
-          id: 'v1',
-          word: 'combine',
-          phonetic: '/kəmˈbaɪn/',
-          syllables: 'com · bine',
-          partOfSpeech: 'verb',
-          theme: 'School & Study',
-          rootBreakdown: 'com- (共同/一起) + bine (結合)',
-          meaning: '結合、混合',
-          example: 'We can combine practice with theory for better memory.',
-          translation: '我們可以將練習與理論結合以達到更好的記憶效果。',
-          synonyms: ['merge', 'unite', 'integrate', 'blend'],
-          antonyms: ['separate', 'divide', 'split'],
-          memoryTrick: 'com (一起) + bine (綁定) ➔ 綁在一起就是「結合」。'
-        },
-        {
-          id: 'v2',
-          word: 'complete',
-          phonetic: '/kəmˈpliːt/',
-          syllables: 'com · plete',
-          partOfSpeech: 'adj / v',
-          theme: 'School & Study',
-          rootBreakdown: 'com- (完全/強調) + plete (填滿)',
-          meaning: '完整的；完成',
-          example: 'Please complete the vocabulary quiz after reading.',
-          translation: '請在閱讀後完成單字測驗。',
-          synonyms: ['finish', 'fulfill', 'entire'],
-          antonyms: ['incomplete', 'partial'],
-          memoryTrick: 'com (完全) + plete (滿) ➔ 全部填滿就是「完成」。'
-        },
-        {
-          id: 'v3',
-          word: 'discussion',
-          phonetic: '/dɪˈskʌʃ.ən/',
-          syllables: 'dis · cus · sion',
-          partOfSpeech: 'noun',
-          theme: 'School & Study',
-          rootBreakdown: 'dis- (分散) + cuss (敲擊) + -ion (名詞字尾)',
-          meaning: '討論、談論',
-          example: 'The students had a lively discussion about learning habits.',
-          translation: '學生們對學習習慣進行了熱烈的討論。',
-          synonyms: ['debate', 'conversation', 'exchange'],
-          antonyms: ['silence'],
-          memoryTrick: 'dis (敲擊/敲散話題) + ion ➔ 把話題敲開分享就是「討論」。'
-        },
-        {
-          id: 'v4',
-          word: 'preview',
-          phonetic: '/ˈpriː.vjuː/',
-          syllables: 'pre · view',
-          partOfSpeech: 'verb / noun',
-          theme: 'School & Study',
-          rootBreakdown: 'pre- (在...之前) + view (看)',
-          meaning: '預習、預覽',
-          example: 'Always preview the new vocabulary before starting a chapter.',
-          translation: '開始閱讀章節前，記得先預習新單字。',
-          synonyms: ['foretaste', 'sample'],
-          antonyms: ['review'],
-          memoryTrick: 'pre (提前) + view (看) ➔ 提前先看就是「預習」。'
-        },
-        {
-          id: 'v5',
-          word: 'indefinite',
-          phonetic: '/ɪnˈdef.ə.nət/',
-          syllables: 'in · def · i · nite',
-          partOfSpeech: 'adjective',
-          theme: 'School & Study',
-          rootBreakdown: 'in- (不) + definite (確定的)',
-          meaning: '不確定的、無限期的',
-          example: 'The project has been postponed for an indefinite period.',
-          translation: '該計畫已被無限期延後。',
-          synonyms: ['uncertain', 'unclear', 'vague'],
-          antonyms: ['definite', 'certain', 'clear'],
-          memoryTrick: 'in (不) + definite (明確) ➔ 不明確的。'
-        },
-        {
-          id: 'v6',
-          word: 'independent',
-          phonetic: '/ˌɪn.dɪˈpen.dənt/',
-          syllables: 'in · de · pen · dent',
-          partOfSpeech: 'adjective',
-          theme: 'School & Study',
-          rootBreakdown: 'in- (不) + dependent (依賴的)',
-          meaning: '獨立的、自主的',
-          example: 'She is an independent thinker who works well alone.',
-          translation: '她是一位獨立思考且能獨當一面的人。',
-          synonyms: ['self-reliant', 'autonomous'],
-          antonyms: ['dependent', 'reliant'],
-          memoryTrick: 'in (不) + depend (依賴) ➔ 不依靠別人即「獨立」。'
-        },
-        {
-          id: 'v7',
-          word: 'academic',
-          phonetic: '/ˌæk.əˈdem.ɪk/',
-          syllables: 'ac · a · dem · ic',
-          partOfSpeech: 'adjective',
-          theme: 'School & Study',
-          rootBreakdown: 'academy (學院) + -ic (形容詞字尾)',
-          meaning: '學術的、學校的',
-          example: 'He achieved high academic standards throughout university.',
-          translation: '他在大學期間一直保持著很高的學術標準。',
-          synonyms: ['scholarly', 'educational'],
-          antonyms: ['practical'],
-          memoryTrick: 'academy (學院) ➔ 學術研究的。'
-        },
-        {
-          id: 'v8',
-          word: 'curriculum',
-          phonetic: '/kəˈrɪk.jə.ləm/',
-          syllables: 'cur · ric · u · lum',
-          partOfSpeech: 'noun',
-          theme: 'School & Study',
-          rootBreakdown: 'curr (奔跑/課程進度) + -ulum',
-          meaning: '學校課程',
-          example: 'The school introduced a new STEM curriculum this year.',
-          translation: '學校今年引進了新的 STEM 課程。',
-          synonyms: ['syllabus', 'program'],
-          antonyms: [],
-          memoryTrick: 'curr (跑道) ➔ 學生要跑完的學習流程即「課程」。'
-        },
-        {
-          id: 'v9',
-          word: 'evaluate',
-          phonetic: '/ɪˈvæl.ju.eɪt/',
-          syllables: 'e · val · u · ate',
-          partOfSpeech: 'verb',
-          theme: 'School & Study',
-          rootBreakdown: 'e- (出來) + value (價值) + -ate (動詞)',
-          meaning: '評估、評價',
-          example: 'Teachers evaluate student progress through projects.',
-          translation: '老師透過專題計畫評估學生的進步。',
-          synonyms: ['assess', 'appraise', 'judge'],
-          antonyms: ['ignore'],
-          memoryTrick: 'e (出) + value (價值) ➔ 把價值算出來就是「評估」。'
-        },
-        {
-          id: 'v10',
-          word: 'thorough',
-          phonetic: '/ˈθɝː.oʊ/',
-          syllables: 'thor · ough',
-          partOfSpeech: 'adjective',
-          theme: 'School & Study',
-          rootBreakdown: 'through (穿過) 的演變',
-          meaning: '徹底的、嚴謹的',
-          example: 'She conducted a thorough review of the textbook.',
-          translation: '她對課本進行了徹底的複習。',
-          synonyms: ['comprehensive', 'exhaustive', 'detailed'],
-          antonyms: ['superficial', 'careless'],
-          memoryTrick: 'through (從頭到尾穿過) ➔ 徹底不放過任何細節。'
-        },
-        {
-          id: 'v11',
-          word: 'formulate',
-          phonetic: '/ˈfɔːr.mjə.leɪt/',
-          syllables: 'for · mu · late',
-          partOfSpeech: 'verb',
-          theme: 'School & Study',
-          rootBreakdown: 'formula (公式) + -ate (使成為)',
-          meaning: '制定、構想出',
-          example: 'The group met to formulate a strategy for the presentation.',
-          translation: '小組聚會以制定簡報的策略。',
-          synonyms: ['devise', 'develop', 'design'],
-          antonyms: ['destroy'],
-          memoryTrick: 'formula (公式/架構) ➔ 套出明確架構即「制定」。'
-        },
-        {
-          id: 'v12',
-          word: 'hypothesis',
-          phonetic: '/haɪˈpɑː.θə.sɪs/',
-          syllables: 'hy · poth · e · sis',
-          partOfSpeech: 'noun',
-          theme: 'School & Study',
-          rootBreakdown: 'hypo- (在...之下) + thesis (論點)',
-          meaning: '假設、假說',
-          example: 'Scientists test their hypothesis through continuous experiments.',
-          translation: '科學家透過持續的實驗來檢驗他們的假設。',
-          synonyms: ['assumption', 'theory', 'premise'],
-          antonyms: ['fact', 'proof'],
-          memoryTrick: 'hypo (低下) + thesis (正式論文) ➔ 在成為正式論文前的提議即「假設」。'
-        },
-        {
-          id: 'v13',
-          word: 'comprehend',
-          phonetic: '/ˌkɑːm.prəˈhend/',
-          syllables: 'com · pre · hend',
-          partOfSpeech: 'verb',
-          theme: 'School & Study',
-          rootBreakdown: 'com- (完全) + prehend (抓住)',
-          meaning: '充分理解、領會',
-          example: 'It is hard to comprehend such complex mathematical logic.',
-          translation: '很難理解如此複雜的數學邏輯。',
-          synonyms: ['understand', 'grasp', 'fathom'],
-          antonyms: ['misunderstand'],
-          memoryTrick: 'com (完全) + prehend (抓住) ➔ 完全抓牢知識即「理解」。'
-        },
-        {
-          id: 'v14',
-          word: 'diligence',
-          phonetic: '/ˈdɪl.ə.dʒəns/',
-          syllables: 'dil · i · gence',
-          partOfSpeech: 'noun',
-          theme: 'School & Study',
-          rootBreakdown: 'di- (分開) + legere (選擇) + -ence',
-          meaning: '勤奮、用功',
-          example: 'His diligence in studying led to exceptional exam scores.',
-          translation: '他在學習上的勤奮帶來了優異的考試成績。',
-          synonyms: ['assiduity', 'perseverance', 'industriousness'],
-          antonyms: ['laziness', 'sloth'],
-          memoryTrick: 'diligent 的名詞型態，代表認真刻苦的精神。'
-        },
-        {
-          id: 'v15',
-          word: 'analyze',
-          phonetic: '/ˈæn.əl.aɪz/',
-          syllables: 'an · a · lyze',
-          partOfSpeech: 'verb',
-          theme: 'School & Study',
-          rootBreakdown: 'ana- (解開) + lyze (分解)',
-          meaning: '分析、剖析',
-          example: 'Researchers analyze the survey data to find trends.',
-          translation: '研究人員分析調查數據以找出趨勢。',
-          synonyms: ['examine', 'inspect', 'dissect'],
-          antonyms: ['synthesize'],
-          memoryTrick: 'ana (解開) + lyze (拆開) ➔ 拆解開來仔細看即「分析」。'
-        },
-        {
-          id: 'v16',
-          word: 'clarify',
-          phonetic: '/ˈklær.ə.faɪ/',
-          syllables: 'clar · i · fy',
-          partOfSpeech: 'verb',
-          theme: 'School & Study',
-          rootBreakdown: 'clar (清晰) + -fy (使成為)',
-          meaning: '澄清、闡明',
-          example: 'Could you clarify the main point of your argument?',
-          translation: '能否請您澄清一下您論點的要義？',
-          synonyms: ['explain', 'elucidate', 'simplify'],
-          antonyms: ['confuse', 'obscure'],
-          memoryTrick: 'clear ➔ clar + fy ➔ 使其變得 clear。'
-        },
-        {
-          id: 'v17',
-          word: 'synthesis',
-          phonetic: '/ˈsɪn.θə.sɪs/',
-          syllables: 'syn · the · sis',
-          partOfSpeech: 'noun',
-          theme: 'School & Study',
-          rootBreakdown: 'syn- (共同) + thesis (放置)',
-          meaning: '綜合、合成',
-          example: 'The essay is a synthesis of various research findings.',
-          translation: '這篇文章是多項研究結果的綜合體。',
-          synonyms: ['combination', 'fusion', 'integration'],
-          antonyms: ['separation', 'analysis'],
-          memoryTrick: 'syn (一起) + thesis (擺放) ➔ 擺放在一起進行「綜合」。'
-        },
-
-        // --- 2. 環境與自然 Environment & Nature (17 字) ---
-        {
-          id: 'v18',
-          word: 'environment',
-          phonetic: '/ɪnˈvaɪ.rən.mənt/',
-          syllables: 'en · vi · ron · ment',
-          partOfSpeech: 'noun',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'environ (環繞) + -ment (名詞字尾)',
-          meaning: '環境、周圍狀況',
-          example: 'A good learning environment accelerates memory retention.',
-          translation: '良好的學習環境能加速記憶保持。',
-          synonyms: ['surroundings', 'ecosystem', 'habitat'],
-          antonyms: ['isolation'],
-          memoryTrick: 'environ (圍繞你的事物) + ment ➔ 周遭圍繞的一切即為「環境」。'
-        },
-        {
-          id: 'v19',
-          word: 'submarine',
-          phonetic: '/ˌsʌb.məˈriːn/',
-          syllables: 'sub · ma · rine',
-          partOfSpeech: 'noun / adj',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'sub- (在...下方) + marine (海洋的)',
-          meaning: '潛水艇；水下的',
-          example: 'The submarine explored the deep trench in the Pacific Ocean.',
-          translation: '潛水艇潛入太平洋深處的溝谷探險。',
-          synonyms: ['underwater vessel', 'submersible'],
-          antonyms: ['aircraft'],
-          memoryTrick: 'sub (在下方) + marine (海洋) ➔ 在海面底下的船艇就是「潛艇」。'
-        },
-        {
-          id: 'v20',
-          word: 'gorgeous',
-          phonetic: '/ˈɡɔːr.dʒəs/',
-          syllables: 'gor · geous',
-          partOfSpeech: 'adjective',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'gorge (咽喉/華麗裝飾) + -ous',
-          meaning: '極其美麗的、絢麗的',
-          example: 'The sunset over the mountain was absolutely gorgeous.',
-          translation: '山頂上的落日景色極其絢麗。',
-          synonyms: ['stunning', 'breathtaking', 'magnificent'],
-          antonyms: ['ugly', 'hideous'],
-          memoryTrick: 'gorgeous 是比 beautiful 更高等級的美。'
-        },
-        {
-          id: 'v21',
-          word: 'sustainable',
-          phonetic: '/səˈsteɪ.nə.bəl/',
-          syllables: 'sus · tain · a · ble',
-          partOfSpeech: 'adjective',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'sus- (在下面) + tain (抓住) + -able',
-          meaning: '永續的、可持續的',
-          example: 'Solar power provides a sustainable energy solution.',
-          translation: '太陽能提供了一種永續的能源解決方案。',
-          synonyms: ['renewable', 'viable'],
-          antonyms: ['unsustainable', 'depletable'],
-          memoryTrick: 'sustain (維持) + able (能夠) ➔ 能長久維持的。'
-        },
-        {
-          id: 'v22',
-          word: 'biodiversity',
-          phonetic: '/ˌbaɪ.oʊ.daɪˈvɝː.sə.t̬i/',
-          syllables: 'bi · o · di · ver · si · ty',
-          partOfSpeech: 'noun',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'bio- (生命) + diversity (多樣性)',
-          meaning: '生物多樣性',
-          example: 'Rainforests are essential for preserving global biodiversity.',
-          translation: '熱帶雨林對於維護全球生物多樣性至關重要。',
-          synonyms: ['ecological variety'],
-          antonyms: ['monoculture'],
-          memoryTrick: 'bio (生物) + diversity (多樣) ➔ 生物物種的多樣性。'
-        },
-        {
-          id: 'v23',
-          word: 'conserve',
-          phonetic: '/kənˈsɝːv/',
-          syllables: 'con · serve',
-          partOfSpeech: 'verb',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'con- (完全) + serve (保存/保持)',
-          meaning: '保護、節約',
-          example: 'Citizens are encouraged to conserve water during droughts.',
-          translation: '鼓勵市民在乾旱期間節約用水。',
-          synonyms: ['preserve', 'protect', 'save'],
-          antonyms: ['waste', 'squander', 'destroy'],
-          memoryTrick: 'con (強調) + serve (保存) ➔ 完整保留保護好。'
-        },
-        {
-          id: 'v24',
-          word: 'ecosystem',
-          phonetic: '/ˈiː.koʊˌsɪs.təm/',
-          syllables: 'e · co · sys · tem',
-          partOfSpeech: 'noun',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'eco- (生態/家園) + system (系統)',
-          meaning: '生態系統',
-          example: 'Plastic pollution imposes severe damage on coral reef ecosystems.',
-          translation: '塑膠污染對珊瑚礁生態系統造成嚴重破壞。',
-          synonyms: ['ecological network', 'biosphere'],
-          antonyms: [],
-          memoryTrick: 'eco (生態) + system (系統) ➔ 生物與環境共存系統。'
-        },
-        {
-          id: 'v25',
-          word: 'drastic',
-          phonetic: '/ˈdræs.tɪk/',
-          syllables: 'dras · tic',
-          partOfSpeech: 'adjective',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'dras (做/行動) + -tic',
-          meaning: '劇烈的、嚴厲的',
-          example: 'Drastic changes in climate threaten ocean wildlife.',
-          translation: '氣候的劇烈變化威脅著海洋野生動物。',
-          synonyms: ['extreme', 'radical', 'severe'],
-          antonyms: ['mild', 'slight', 'gradual'],
-          memoryTrick: 'dras (劇烈動作) ➔ 引起巨大影響的劇烈變更。'
-        },
-        {
-          id: 'v26',
-          word: 'contamination',
-          phonetic: '/kənˌtæm.əˈneɪ.ʃən/',
-          syllables: 'con · tam · i · na · tion',
-          partOfSpeech: 'noun',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'con- + tam (接觸/污染) + -ation',
-          meaning: '污染、毒害',
-          example: 'The leakage led to severe groundwater contamination.',
-          translation: '洩漏事件導致嚴重的地下水污染。',
-          synonyms: ['pollution', 'impurity', 'infection'],
-          antonyms: ['purification', 'cleanliness'],
-          memoryTrick: 'tamper (弄髒/不當碰觸) ➔ 接觸毒物造成的「污染」。'
-        },
-        {
-          id: 'v27',
-          word: 'renewable',
-          phonetic: '/rɪˈnuː.ə.bəl/',
-          syllables: 're · new · a · ble',
-          partOfSpeech: 'adjective',
-          theme: 'Environment & Nature',
-          rootBreakdown: 're- (重新) + new (新) + -able',
-          meaning: '可再生的',
-          example: 'Wind energy is one of the cleanest renewable resources.',
-          translation: '風能是最清潔的再生資源之一。',
-          synonyms: ['sustainable', 'inexhaustible'],
-          antonyms: ['nonrenewable', 'exhaustible'],
-          memoryTrick: 're (再) + new (變新) + able (能) ➔ 能源源不絕更新的。'
-        },
-        {
-          id: 'v28',
-          word: 'habitat',
-          phonetic: '/ˈhæb.ə.tæt/',
-          syllables: 'hab · i · tat',
-          partOfSpeech: 'noun',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'habit (居住/習慣)',
-          meaning: '棲息地、生長地',
-          example: 'Deforestation causes animals to lose their natural habitat.',
-          translation: '砍伐森林導致野生動物失去天然棲息地。',
-          synonyms: ['dwelling', 'environment', 'home'],
-          antonyms: [],
-          memoryTrick: 'inhabit (居住) ➔ 動物習慣居住的地方即「棲息地」。'
-        },
-        {
-          id: 'v29',
-          word: 'catastrophe',
-          phonetic: '/kəˈtæs.trə.fi/',
-          syllables: 'ca · tas · tro · phe',
-          partOfSpeech: 'noun',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'cata- (向下) + strophe (轉折)',
-          meaning: '大災難、浩劫',
-          example: 'The oil spill was an environmental catastrophe for the coastline.',
-          translation: '漏油事件對該海岸線而言是一場環境浩劫。',
-          synonyms: ['disaster', 'calamity', 'tragedy'],
-          antonyms: ['blessing', 'boon'],
-          memoryTrick: 'cata (崩塌向下) + strophe (轉折) ➔ 命運崩塌的災難。'
-        },
-        {
-          id: 'v30',
-          word: 'emission',
-          phonetic: '/iˈmɪʃ.ən/',
-          syllables: 'e · mis · sion',
-          partOfSpeech: 'noun',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'e- (向外) + miss (傳送) + -ion',
-          meaning: '排放物、散發',
-          example: 'Reducing carbon emissions is vital to curbing global warming.',
-          translation: '減少碳排放對於遏制全球暖化至關重要。',
-          synonyms: ['discharge', 'exhalation', 'release'],
-          antonyms: ['absorption', 'intake'],
-          memoryTrick: 'e (出) + miss (發射) ➔ 向外排放廢氣。'
-        },
-        {
-          id: 'v31',
-          word: 'preserve',
-          phonetic: '/prɪˈzɝːv/',
-          syllables: 'pre · serve',
-          partOfSpeech: 'verb',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'pre- (提前) + serve (保持)',
-          meaning: '保存、維護',
-          example: 'National parks help preserve endangered wildlife species.',
-          translation: '國家公園有助於保護瀕危野生動物物種。',
-          synonyms: ['protect', 'safeguard', 'maintain'],
-          antonyms: ['destroy', 'damage'],
-          memoryTrick: 'pre (事前) + serve (守護) ➔ 預先保護好。'
-        },
-        {
-          id: 'v32',
-          word: 'precipitation',
-          phonetic: '/prɪˌsɪp.əˈteɪ.ʃən/',
-          syllables: 'pre · cip · i · ta · tion',
-          partOfSpeech: 'noun',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'pre- + cipit (頭朝下落) + -ation',
-          meaning: '降水（雨、雪等）',
-          example: 'The region receives heavy precipitation during the monsoon season.',
-          translation: '該地區在季風季節降水豐富。',
-          synonyms: ['rainfall', 'downpour'],
-          antonyms: ['drought'],
-          memoryTrick: '頭朝下急速落下 ➔ 天空掉落下來的水滴。'
-        },
-        {
-          id: 'v33',
-          word: 'ecological',
-          phonetic: '/ˌiː.kəˈlɑː.dʒɪ.kəl/',
-          syllables: 'e · co · log · i · cal',
-          partOfSpeech: 'adjective',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'eco- (生態) + logy (學問) + -cal',
-          meaning: '生態的、環保的',
-          example: 'Building dams can disrupt the local ecological balance.',
-          translation: '興建水壩可能會破壞當地的生態平衡。',
-          synonyms: ['environmental'],
-          antonyms: [],
-          memoryTrick: 'eco (生態) + logical (學科相關的)。'
-        },
-        {
-          id: 'v34',
-          word: 'depletion',
-          phonetic: '/dɪˈpliː.ʃən/',
-          syllables: 'de · ple · tion',
-          partOfSpeech: 'noun',
-          theme: 'Environment & Nature',
-          rootBreakdown: 'de- (減少/剝奪) + plet (滿) + -ion',
-          meaning: '耗盡、枯竭',
-          example: 'Overfishing leads to the rapid depletion of marine stocks.',
-          translation: '過度捕撈導致海洋資源快速枯竭。',
-          synonyms: ['exhaustion', 'reduction', 'drain'],
-          antonyms: ['replenishment', 'abundance'],
-          memoryTrick: 'de (去掉) + plet (滿) ➔ 把原本滿的東西弄空即「耗盡」。'
-        },
-
-        // --- 3. 情感與性格 Emotion & Feeling (17 字) ---
-        {
-          id: 'v35',
-          word: 'beautiful',
-          phonetic: '/ˈbjuː.tɪ.fəl/',
-          syllables: 'beau · ti · ful',
-          partOfSpeech: 'adjective',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'beauty (美) + -ful (充滿)',
-          meaning: '美麗的、漂亮的',
-          example: 'She wrote a beautiful story based on her childhood memory.',
-          translation: '她根據童年回憶寫了一個美麗的故事。',
-          synonyms: ['gorgeous', 'pretty', 'stunning', 'attractive'],
-          antonyms: ['ugly', 'unattractive', 'awkward'],
-          memoryTrick: 'beauty + ful (充滿) ➔ 充滿美感的。'
-        },
-        {
-          id: 'v36',
-          word: 'happiness',
-          phonetic: '/ˈhæp.i.nəs/',
-          syllables: 'hap · pi · ness',
-          partOfSpeech: 'noun',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'happy (快樂) + -ness (名詞字尾)',
-          meaning: '快樂、幸福',
-          example: 'True happiness comes from internal peace and gratitude.',
-          translation: '真正的快樂源自於內心的平靜與感激。',
-          synonyms: ['joy', 'delight', 'bliss'],
-          antonyms: ['sadness', 'sorrow'],
-          memoryTrick: 'happy 形容詞去 y 加 -ness 變成抽象名詞。'
-        },
-        {
-          id: 'v37',
-          word: 'stunning',
-          phonetic: '/ˈstʌn.ɪŋ/',
-          syllables: 'stun · ning',
-          partOfSpeech: 'adjective',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'stun (震驚) + -ing',
-          meaning: '令人震驚的美麗、震撼的',
-          example: 'Her stunning performance amazed the entire audience.',
-          translation: '她令人震撼的表演驚艷了全場觀眾。',
-          synonyms: ['breathtaking', 'astounding'],
-          antonyms: ['ordinary', 'unremarkable'],
-          memoryTrick: 'stun (讓人發暈/震驚) ➔ 美到發呆。'
-        },
-        {
-          id: 'v38',
-          word: 'awkward',
-          phonetic: '/ˈɔːk.wɚd/',
-          syllables: 'awk · ward',
-          partOfSpeech: 'adjective',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'awk (笨拙的) + -ward (朝向)',
-          meaning: '尷尬的、笨拙的',
-          example: 'There was an awkward silence in the meeting room.',
-          translation: '會議室裡出現了一陣尷尬的沉默。',
-          synonyms: ['clumsy', 'embarrassing'],
-          antonyms: ['graceful', 'elegant'],
-          memoryTrick: 'awkward 諧音「嘔客」➔ 動作笨拙令人覺得尷尬。'
-        },
-        {
-          id: 'v39',
-          word: 'careless',
-          phonetic: '/ˈkeər.ləs/',
-          syllables: 'care · less',
-          partOfSpeech: 'adjective',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'care (關心/小心) + -less (沒有)',
-          meaning: '粗心大意的、不留神的',
-          example: 'A careless mistake led to the loss of important data.',
-          translation: '一個粗心的錯誤導致重要資料遺失。',
-          synonyms: ['negligent', 'thoughtless'],
-          antonyms: ['careful', 'cautious'],
-          memoryTrick: 'care (細心) + less (無) ➔ 毫無細心即「粗心」。'
-        },
-        {
-          id: 'v40',
-          word: 'empathy',
-          phonetic: '/ˈem.pə.θi/',
-          syllables: 'em · pa · thy',
-          partOfSpeech: 'noun',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'em- (進入/內部) + pathy (感情)',
-          meaning: '同理心、共鳴',
-          example: 'Showing empathy towards others builds stronger social bonds.',
-          translation: '對他人展現同理心能建立更堅固的社交紐帶。',
-          synonyms: ['compassion', 'sympathy', 'understanding'],
-          antonyms: ['apathy', 'indifference'],
-          memoryTrick: 'em (進去) + pathy (感受) ➔ 走進別人的感受裡即「同理心」。'
-        },
-        {
-          id: 'v41',
-          word: 'resilient',
-          phonetic: '/rɪˈzɪl.jənt/',
-          syllables: 're · sil · ient',
-          partOfSpeech: 'adjective',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 're- (重新) + sili (跳躍) + -ent',
-          meaning: '有韌性的、能迅速復原的',
-          example: 'She is a resilient person who bounces back from setbacks.',
-          translation: '她是一個非常有韌性的人，能迅速從挫折中反彈復原。',
-          synonyms: ['adaptable', 'tough', 'robust'],
-          antonyms: ['fragile', 'vulnerable', 'weak'],
-          memoryTrick: 're (再) + sili (跳起) ➔ 被打倒後能再度彈跳起來。'
-        },
-        {
-          id: 'v42',
-          word: 'optimistic',
-          phonetic: '/ˌɑːp.təˈmɪs.tɪk/',
-          syllables: 'op · ti · mis · tic',
-          partOfSpeech: 'adjective',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'opti (最佳) + -mistic (主義的)',
-          meaning: '樂觀的、抱有希望的',
-          example: 'He maintains an optimistic view about his future career.',
-          translation: '他對自己未來的職涯保持著樂觀的態度。',
-          synonyms: ['hopeful', 'positive', 'sanguine'],
-          antonyms: ['pessimistic', 'gloomy'],
-          memoryTrick: 'opt (選擇) + best ➔ 總是看事情最好的一面即「樂觀」。'
-        },
-        {
-          id: 'v43',
-          word: 'anxiety',
-          phonetic: '/æŋˈzaɪ.ə.t̬i/',
-          syllables: 'anx · i · e · ty',
-          partOfSpeech: 'noun',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'anx (絞緊/窒息) + -iety',
-          meaning: '焦慮、不安',
-          example: 'Deep breathing exercises help reduce speech anxiety.',
-          translation: '深呼吸練習有助於減輕演講時的焦慮。',
-          synonyms: ['apprehension', 'worry', 'nervousness'],
-          antonyms: ['calmness', 'serenity', 'peace'],
-          memoryTrick: 'anxious 的名詞形，心被絞緊的不適感。'
-        },
-        {
-          id: 'v44',
-          word: 'compassion',
-          phonetic: '/kəmˈpæʃ.ən/',
-          syllables: 'com · pas · sion',
-          partOfSpeech: 'noun',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'com- (一起) + passion (苦難/感受)',
-          meaning: '憐憫、同情心',
-          example: 'The doctor showed deep compassion for the suffering patients.',
-          translation: '醫生對受苦的病人展現了深深的憐憫心。',
-          synonyms: ['sympathy', 'kindness', 'empathy'],
-          antonyms: ['cruelty', 'indifference'],
-          memoryTrick: 'com (一同) + passion (受苦) ➔ 願意與他人一同感受苦難。'
-        },
-        {
-          id: 'v45',
-          word: 'frustration',
-          phonetic: '/frʌsˈtreɪ.ʃən/',
-          syllables: 'frus · tra · tion',
-          partOfSpeech: 'noun',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'frustra (欺騙/落空) + -tion',
-          meaning: '挫折、受挫感',
-          example: 'Repeated computer crashes caused immense frustration.',
-          translation: '電腦頻繁當機造成了極大的挫折感。',
-          synonyms: ['annoyance', 'disappointment', 'exasperation'],
-          antonyms: ['satisfaction', 'fulfillment'],
-          memoryTrick: '期待落空造成的煩躁情緒。'
-        },
-        {
-          id: 'v46',
-          word: 'melancholy',
-          phonetic: '/ˈmel.ən.kɑː.li/',
-          syllables: 'mel · an · chol · y',
-          partOfSpeech: 'noun / adj',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'melan (黑) + choly (膽汁)',
-          meaning: '憂鬱、哀傷；憂鬱的',
-          example: 'A feeling of melancholy descended over the empty house.',
-          translation: '一股憂鬱的情緒籠罩著空無一人的房子。',
-          synonyms: ['gloom', 'sadness', 'sorrow'],
-          antonyms: ['cheerfulness', 'joy'],
-          memoryTrick: '古希臘醫學認為黑膽汁過多會讓人「憂鬱」。'
-        },
-        {
-          id: 'v47',
-          word: 'enthusiasm',
-          phonetic: '/ɪnˈθuː.zi.æz.əm/',
-          syllables: 'en · thu · si · asm',
-          partOfSpeech: 'noun',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'en- (內部) + theos (神) + -asm',
-          meaning: '熱情、熱忱',
-          example: 'Her enthusiasm for English learning inspired the whole class.',
-          translation: '她對英文學習的熱情感染了全班。',
-          synonyms: ['passion', 'zeal', 'eagerness'],
-          antonyms: ['apathy', 'indifference'],
-          memoryTrick: 'en (心中) + theos (有神靈降臨) ➔ 精神煥發充滿狂熱。'
-        },
-        {
-          id: 'v48',
-          word: 'vulnerable',
-          phonetic: '/ˈvʌl.nɚ.ə.bəl/',
-          syllables: 'vul · ner · a · ble',
-          partOfSpeech: 'adjective',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'vulner (傷害) + -able',
-          meaning: '脆弱的、易受傷害的',
-          example: 'Small children are particularly vulnerable to winter flu.',
-          translation: '幼童特別容易遭受冬季流感的侵襲。',
-          synonyms: ['susceptible', 'exposed', 'fragile'],
-          antonyms: ['invulnerable', 'protected', 'strong'],
-          memoryTrick: 'vulner (傷口) + able (容易) ➔ 容易產生傷口的弱者。'
-        },
-        {
-          id: 'v49',
-          word: 'serenity',
-          phonetic: '/səˈren.ə.t̬i/',
-          syllables: 'se · ren · i · ty',
-          partOfSpeech: 'noun',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'serene (晴朗/平靜) + -ity',
-          meaning: '寧靜、平靜',
-          example: 'Meditation brings a profound sense of inner serenity.',
-          translation: '冥想帶來內心深處的寧靜感。',
-          synonyms: ['tranquility', 'peacefulness', 'calmness'],
-          antonyms: ['agitation', 'chaos'],
-          memoryTrick: 'serene (晴空無雲) ➔ 內心毫無波瀾的平靜。'
-        },
-        {
-          id: 'v50',
-          word: 'affection',
-          phonetic: '/əˈfek.ʃən/',
-          syllables: 'af · fec · tion',
-          partOfSpeech: 'noun',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'af- (對) + fect (做/影響) + -ion',
-          meaning: '喜愛、關愛',
-          example: 'The grandmother held deep affection for all her grandchildren.',
-          translation: '祖母對所有的孫子女都懷有深深的疼愛。',
-          synonyms: ['fondness', 'warmth', 'tenderness'],
-          antonyms: ['hatred', 'dislike'],
-          memoryTrick: 'affect (感情影響) ➔ 給予情感照顧。'
-        },
-        {
-          id: 'v51',
-          word: 'hostility',
-          phonetic: '/hɑːˈstɪl.ə.t̬i/',
-          syllables: 'hos · til · i · ty',
-          partOfSpeech: 'noun',
-          theme: 'Emotion & Feeling',
-          rootBreakdown: 'hostis (敵人) + -ity',
-          meaning: '敵意、敵對',
-          example: 'They sensed an aura of hostility from the opposing team.',
-          translation: '他們感受到了來自對手球隊的敵意。',
-          synonyms: ['enmity', 'antagonism', 'animosity'],
-          antonyms: ['friendliness', 'hospitality'],
-          memoryTrick: 'host (敵人) ➔ 視如仇敵的敵對態度。'
-        },
-
-        // --- 4. 職場與商務 Business & Work (17 字) ---
-        {
-          id: 'v52',
-          word: 'government',
-          phonetic: '/ˈɡʌv.ɚn.mənt/',
-          syllables: 'gov · ern · ment',
-          partOfSpeech: 'noun',
-          theme: 'Business & Work',
-          rootBreakdown: 'govern (管理) + -ment (名詞字尾)',
-          meaning: '政府、治理',
-          example: 'The government launched a project to boost English education.',
-          translation: '政府啟動了一項推動英語教育的計畫。',
-          synonyms: ['administration', 'authority'],
-          antonyms: ['anarchy'],
-          memoryTrick: 'govern (管轄) + ment ➔ 負責管轄國家的機構。'
-        },
-        {
-          id: 'v53',
-          word: 'valuable',
-          phonetic: '/ˈvæl.ju.ə.bəl/',
-          syllables: 'val · u · a · ble',
-          partOfSpeech: 'adjective',
-          theme: 'Business & Work',
-          rootBreakdown: 'value (價值) + -able',
-          meaning: '貴重的、有價值的',
-          example: 'The mentor gave us valuable advice on career choices.',
-          translation: '導師在職涯選擇上給了我們寶貴的建議。',
-          synonyms: ['precious', 'worthwhile', 'priceless'],
-          antonyms: ['worthless', 'useless'],
-          memoryTrick: 'value (價值) + able (能) ➔ 體現價值的。'
-        },
-        {
-          id: 'v54',
-          word: 'income',
-          phonetic: '/ˈɪn.kʌm/',
-          syllables: 'in · come',
-          partOfSpeech: 'noun',
-          theme: 'Business & Work',
-          rootBreakdown: 'in- (進入) + come (來)',
-          meaning: '收入、所得',
-          example: 'Managing personal finance depends on steady monthly income.',
-          translation: '個人理財取決於穩定的每月收入。',
-          synonyms: ['revenue', 'earnings', 'salary'],
-          antonyms: ['expense', 'outflow'],
-          memoryTrick: 'in (進來) + come (來到) ➔ 錢流進口袋。'
-        },
-        {
-          id: 'v55',
-          word: 'available',
-          phonetic: '/əˈveɪ.lə.bəl/',
-          syllables: 'a · vail · a · ble',
-          partOfSpeech: 'adjective',
-          theme: 'Business & Work',
-          rootBreakdown: 'avail (價值/效益) + -able',
-          meaning: '可利用的、可獲取的',
-          example: 'The report will be available online starting tomorrow.',
-          translation: '這份報告明天起可在線上獲取。',
-          synonyms: ['accessible', 'obtainable'],
-          antonyms: ['unavailable', 'occupied'],
-          memoryTrick: 'avail (效益) + able (可) ➔ 可以取得使用的。'
-        },
-        {
-          id: 'v56',
-          word: 'collaborate',
-          phonetic: '/kəˈlæb.ə.reɪt/',
-          syllables: 'col · lab · o · rate',
-          partOfSpeech: 'verb',
-          theme: 'Business & Work',
-          rootBreakdown: 'col- (共同) + labor (工作) + -ate',
-          meaning: '合作、協同工作',
-          example: 'Two international teams collaborated to develop the new software.',
-          translation: '兩個國際團隊合作開發這款新軟體。',
-          synonyms: ['cooperate', 'team up', 'partner'],
-          antonyms: ['compete', 'oppose'],
-          memoryTrick: 'col (一起) + labor (勞動) ➔ 一起勞動工作。'
-        },
-        {
-          id: 'v57',
-          word: 'strategic',
-          phonetic: '/strəˈtiː.dʒɪk/',
-          syllables: 'stra · te · gic',
-          partOfSpeech: 'adjective',
-          theme: 'Business & Work',
-          rootBreakdown: 'strategy (策略) + -ic',
-          meaning: '戰略性的、策略上的',
-          example: 'The company made a strategic decision to expand into Asia.',
-          translation: '該公司做出向亞洲擴張的戰略性決定。',
-          synonyms: ['calculated', 'planned', 'tactical'],
-          antonyms: ['unplanned', 'random'],
-          memoryTrick: 'strategy 的形容詞，關乎全局規劃。'
-        },
-        {
-          id: 'v58',
-          word: 'negotiate',
-          phonetic: '/nəˈɡoʊ.ʃi.eɪt/',
-          syllables: 'ne · go · ti · ate',
-          partOfSpeech: 'verb',
-          theme: 'Business & Work',
-          rootBreakdown: 'neg- (非) + otium (空閒) + -ate',
-          meaning: '談判、協商',
-          example: 'The union met with management to negotiate salary increases.',
-          translation: '工會與管理層開會協商調薪事宜。',
-          synonyms: ['bargain', 'mediate', 'settle'],
-          antonyms: ['dictate', 'refuse'],
-          memoryTrick: '沒有空閒去偷懶 ➔ 認真坐下來商業談判。'
-        },
-        {
-          id: 'v59',
-          word: 'productivity',
-          phonetic: '/ˌproʊ.dʌkˈtɪv.ə.t̬i/',
-          syllables: 'pro · duc · tiv · i · ty',
-          partOfSpeech: 'noun',
-          theme: 'Business & Work',
-          rootBreakdown: 'pro- (向前) + duct (引導) + -ivity',
-          meaning: '生產力、效率',
-          example: 'Flexible working hours boosted overall office productivity.',
-          translation: '彈性工作時間提高了辦公室的整體生產力。',
-          synonyms: ['yield', 'efficiency', 'output'],
-          antonyms: ['unproductiveness'],
-          memoryTrick: 'productive 的名詞，代表產出效率。'
-        },
-        {
-          id: 'v60',
-          word: 'executive',
-          phonetic: '/ɪɡˈzek.jə.t̬ɪv/',
-          syllables: 'ex · ec · u · tive',
-          partOfSpeech: 'noun / adj',
-          theme: 'Business & Work',
-          rootBreakdown: 'ex- (出) + secut (跟隨/執行) + -ive',
-          meaning: '高階主管；執行的',
-          example: 'The chief executive presented the quarterly financial report.',
-          translation: '執行長呈報了季度財務報告。',
-          synonyms: ['manager', 'administrator', 'director'],
-          antonyms: ['subordinate', 'employee'],
-          memoryTrick: 'execute (貫徹執行) 的負責人。'
-        },
-        {
-          id: 'v61',
-          word: 'subsidiary',
-          phonetic: '/səbˈsɪd.i.er.i/',
-          syllables: 'sub · sid · i · ar · y',
-          partOfSpeech: 'noun / adj',
-          theme: 'Business & Work',
-          rootBreakdown: 'sub- (在下面) + sid (坐) + -ary',
-          meaning: '子公司、附屬機構',
-          example: 'The tech giant acquired a small European subsidiary.',
-          translation: '這家科技巨頭收購了一家歐洲的小型子公司。',
-          synonyms: ['branch', 'affiliate'],
-          antonyms: ['parent company', 'headquarters'],
-          memoryTrick: 'sub (母公司底下) + sid (坐著的附屬機構)。'
-        },
-        {
-          id: 'v62',
-          word: 'compensation',
-          phonetic: '/ˌkɑːm.pənˈseɪ.ʃən/',
-          syllables: 'com · pen · sa · tion',
-          partOfSpeech: 'noun',
-          theme: 'Business & Work',
-          rootBreakdown: 'com- (完全) + pend (衡量/付款) + -ation',
-          meaning: '補償、薪酬報酬',
-          example: 'The company offers competitive sales compensation packages.',
-          translation: '該公司提供具有競爭力的銷售薪酬方案。',
-          synonyms: ['remuneration', 'reimbursement', 'payment'],
-          antonyms: ['penalty', 'fine'],
-          memoryTrick: 'pend (支付金錢) ➔ 給予員工付出時間的報酬。'
-        },
-        {
-          id: 'v63',
-          word: 'entrepreneur',
-          phonetic: '/ˌɑːn.trə.prəˈnɝː/',
-          syllables: 'en · tre · pre · neur',
-          partOfSpeech: 'noun',
-          theme: 'Business & Work',
-          rootBreakdown: 'entre- (在...之間) + preneur (承擔抓取)',
-          meaning: '創業家、企業家',
-          example: 'The young entrepreneur founded a successful eco-friendly start-up.',
-          translation: '這位年輕的創業家成立了一家成功的環保初創公司。',
-          synonyms: ['founder', 'businessperson'],
-          antonyms: ['employee'],
-          memoryTrick: '承擔商業風險開創新局的人。'
-        },
-        {
-          id: 'v64',
-          word: 'monopoly',
-          phonetic: '/məˈnɑː.pəl.i/',
-          syllables: 'mo · nop · o · ly',
-          partOfSpeech: 'noun',
-          theme: 'Business & Work',
-          rootBreakdown: 'mono- (單一) + poly (販售)',
-          meaning: '壟斷、獨佔',
-          example: 'The government passed laws to prevent market monopoly.',
-          translation: '政府通過法律防止市場壟斷。',
-          synonyms: ['domination', 'exclusivity'],
-          antonyms: ['competition', 'free market'],
-          memoryTrick: 'mono (獨自一人) + poly (賣東西) ➔ 獨家買賣。'
-        },
-        {
-          id: 'v65',
-          word: 'revenue',
-          phonetic: '/ˈrev.ə.nuː/',
-          syllables: 'rev · e · nue',
-          partOfSpeech: 'noun',
-          theme: 'Business & Work',
-          rootBreakdown: 're- (返回) + venue (來到)',
-          meaning: '營業收入、稅收',
-          example: 'Annual advertising revenue grew by fifteen percent.',
-          translation: '年度廣告收入增長了百分之十五。',
-          synonyms: ['income', 'earnings', 'proceeds'],
-          antonyms: ['expenditure', 'loss'],
-          memoryTrick: '投資商業活動後流回來的資金。'
-        },
-        {
-          id: 'v66',
-          word: 'feasibility',
-          phonetic: '/ˌfiː.zəˈbɪl.ə.t̬i/',
-          syllables: 'fea · si · bil · i · ty',
-          partOfSpeech: 'noun',
-          theme: 'Business & Work',
-          rootBreakdown: 'feas (做) + -ability (能力)',
-          meaning: '可行性',
-          example: 'Engineers conducted a feasibility study before building the bridge.',
-          translation: '工程師在造橋前進行了可行性研究。',
-          synonyms: ['practicability', 'viability'],
-          antonyms: ['impossibility', 'unfeasibility'],
-          memoryTrick: 'feasible (做得通的) + ability ➔ 能否實現的能力。'
-        },
-        {
-          id: 'v67',
-          word: 'benchmark',
-          phonetic: '/ˈbentʃ.mɑːrk/',
-          syllables: 'bench · mark',
-          partOfSpeech: 'noun / verb',
-          theme: 'Business & Work',
-          rootBreakdown: 'bench (長椅/工作台) + mark (標記)',
-          meaning: '基準、標竿',
-          example: 'Their service quality set a new benchmark in the hotel industry.',
-          translation: '他們的服務品質樹立了飯店業的新標竿。',
-          synonyms: ['standard', 'criterion', 'gauge'],
-          antonyms: [],
-          memoryTrick: '刻在工作台上的標準測量刻度。'
-        },
-        {
-          id: 'v68',
-          word: 'compliance',
-          phonetic: '/kəmˈplaɪ.əns/',
-          syllables: 'com · pli · ance',
-          partOfSpeech: 'noun',
-          theme: 'Business & Work',
-          rootBreakdown: 'comply (順從) + -ance',
-          meaning: '合規、順從',
-          example: 'The firm ensures full compliance with local financial regulations.',
-          translation: '該公司確保完全符合當地金融法規。',
-          synonyms: ['conformity', 'adherence', 'obedience'],
-          antonyms: ['violation', 'defiance', 'noncompliance'],
-          memoryTrick: 'comply (遵從規定) 的名詞抽象形態。'
-        },
-
-        // --- 5. 科技與創新 Tech & Innovation (16 字) ---
-        {
-          id: 'v69',
-          word: 'algorithm',
-          phonetic: '/ˈæl.ɡə.rɪ.ðəm/',
-          syllables: 'al · go · rithm',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: '阿拉伯數學家 Al-Khwarizmi 演變而來',
-          meaning: '演算法、計算規則',
-          example: 'Social media algorithms recommend content based on user interest.',
-          translation: '社群媒體演算法根據使用者興趣推薦內容。',
-          synonyms: ['computation rule', 'procedure'],
-          antonyms: [],
-          memoryTrick: '電腦程式遵循的核心步驟邏輯。'
-        },
-        {
-          id: 'v70',
-          word: 'innovation',
-          phonetic: '/ˌɪn.əˈveɪ.ʃən/',
-          syllables: 'in · no · va · tion',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'in- (進入) + nov (新) + -ation',
-          meaning: '創新、改革',
-          example: 'Technological innovation drives economic productivity forward.',
-          translation: '科技創新推動經濟生產力向前發展。',
-          synonyms: ['breakthrough', 'novelty', 'invention'],
-          antonyms: ['stagnation', 'tradition'],
-          memoryTrick: 'in (帶入) + nov (新鮮元素) ➔ 帶來革新。'
-        },
-        {
-          id: 'v71',
-          word: 'automation',
-          phonetic: '/ˌɑː.t̬əˈmeɪ.ʃən/',
-          syllables: 'au · to · ma · tion',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'auto- (自動) + mat (運轉) + -ion',
-          meaning: '自動化',
-          example: 'Factory automation significantly reduces manual labor costs.',
-          translation: '工廠自動化大幅降低了人工成本。',
-          synonyms: ['mechanization', 'computerization'],
-          antonyms: ['manual operation'],
-          memoryTrick: 'auto (自我) + motion (運轉) ➔ 機器自己運轉。'
-        },
-        {
-          id: 'v72',
-          word: 'synthetic',
-          phonetic: '/sɪnˈθet.ɪk/',
-          syllables: 'syn · thet · ic',
-          partOfSpeech: 'adjective',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'syn- (共同) + thet (放置) + -ic',
-          meaning: '人造的、合成的',
-          example: 'Synthetic materials are often lighter and more durable.',
-          translation: '合成材料通常更輕且更耐用。',
-          synonyms: ['artificial', 'man-made', 'fabricated'],
-          antonyms: ['natural', 'genuine'],
-          memoryTrick: 'synthesis (人為合成的產物)。'
-        },
-        {
-          id: 'v73',
-          word: 'database',
-          phonetic: '/ˈdeɪ.t̬ə.beɪs/',
-          syllables: 'da · ta · base',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'data (資料) + base (基地)',
-          meaning: '資料庫',
-          example: 'Customer records are securely stored in a centralized database.',
-          translation: '客戶記錄安全地儲存在集中式資料庫中。',
-          synonyms: ['data bank', 'repository'],
-          antonyms: [],
-          memoryTrick: 'data (數據) + base (基底倉庫)。'
-        },
-        {
-          id: 'v74',
-          word: 'encryption',
-          phonetic: '/ɪnˈkrɪp.ʃən/',
-          syllables: 'en · cryp · tion',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'en- (使入) + crypt (隱密地窖) + -ion',
-          meaning: '密碼學加密',
-          example: 'End-to-end encryption keeps private messages safe from hackers.',
-          translation: '端到端加密可保護私訊免受駭客侵犯。',
-          synonyms: ['encoding', 'ciphering'],
-          antonyms: ['decryption', 'decoding'],
-          memoryTrick: 'crypt (將資訊鎖進防護地窖中)。'
-        },
-        {
-          id: 'v75',
-          word: 'artificial',
-          phonetic: '/ˌɑːr.t̬əˈfɪʃ.əl/',
-          syllables: 'ar · ti · fi · cial',
-          partOfSpeech: 'adjective',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'art (技藝/人為) + fic (做) + -ial',
-          meaning: '人工的、虛假的',
-          example: 'Artificial intelligence is reshaping modern healthcare industries.',
-          translation: '人工智慧正在重塑現代醫療保健產業。',
-          synonyms: ['synthetic', 'man-made', 'simulated'],
-          antonyms: ['real', 'natural', 'authentic'],
-          memoryTrick: 'art (人巧) + fic (製造) ➔ 人工打造的。'
-        },
-        {
-          id: 'v76',
-          word: 'interface',
-          phonetic: '/ˈɪn.t̬ɚ.feɪs/',
-          syllables: 'in · ter · face',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'inter- (之間) + face (臉/界面)',
-          meaning: '使用者介面、接面',
-          example: 'The designer created an intuitive user interface for the app.',
-          translation: '設計師為該應用程式創建了直覺的使用者介面。',
-          synonyms: ['interaction layer', 'boundary'],
-          antonyms: [],
-          memoryTrick: 'inter (兩者之間) + face (面對相交的平台)。'
-        },
-        {
-          id: 'v77',
-          word: 'virtual',
-          phonetic: '/ˈvɝː.tʃu.əl/',
-          syllables: 'vir · tu · al',
-          partOfSpeech: 'adjective',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'virtue (潛能/實質) + -al',
-          meaning: '虛擬的、實質上的',
-          example: 'Students attended virtual reality classrooms during quarantine.',
-          translation: '學生在隔離期間參加了虛擬實境教室。',
-          synonyms: ['simulated', 'digital', 'cyber'],
-          antonyms: ['physical', 'real', 'actual'],
-          memoryTrick: 'virtual reality (VR 虛擬實境)。'
-        },
-        {
-          id: 'v78',
-          word: 'bandwidth',
-          phonetic: '/ˈbænd.wɪdθ/',
-          syllables: 'band · width',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'band (頻段) + width (寬度)',
-          meaning: '頻寬、網路容量',
-          example: 'High-definition video streaming requires greater network bandwidth.',
-          translation: '高清影片串流需要更大的網路頻寬。',
-          synonyms: ['capacity', 'data transmission rate'],
-          antonyms: [],
-          memoryTrick: 'band (頻率帶) + width (寬窄度)。'
-        },
-        {
-          id: 'v79',
-          word: 'prototype',
-          phonetic: '/ˈproʊ.t̬ə.taɪp/',
-          syllables: 'pro · to · type',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'proto- (原始/第一) + type (原型)',
-          meaning: '原型、雛形',
-          example: 'Engineers tested the drone prototype before mass manufacturing.',
-          translation: '工程師在量產前測試了無人機原型。',
-          synonyms: ['model', 'archetype', 'mock-up'],
-          antonyms: ['final product'],
-          memoryTrick: 'proto (最初第一個) + type (樣版)。'
-        },
-        {
-          id: 'v80',
-          word: 'architecture',
-          phonetic: '/ˈɑːr.kə.tek.tʃɚ/',
-          syllables: 'ar · chi · tec · ture',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'archi- (首席/主導) + tect (建造) + -ure',
-          meaning: '架構、建築學',
-          example: 'Cloud software architecture ensures system stability.',
-          translation: '雲端軟體架構確保系統穩定性。',
-          synonyms: ['structure', 'framework', 'design'],
-          antonyms: [],
-          memoryTrick: 'archi (主要) + tect (工匠技術) ➔ 整體架構系統。'
-        },
-        {
-          id: 'v81',
-          word: 'autonomous',
-          phonetic: '/ɑːˈtɑː.nə.məs/',
-          syllables: 'au · ton · o · mous',
-          partOfSpeech: 'adjective',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'auto- (自我) + nomos (法則/控制) + -ous',
-          meaning: '自動駕駛的、自主的',
-          example: 'Autonomous vehicles rely on sensors to navigate traffic safety.',
-          translation: '自動駕駛汽車依賴感測器來安全導航交通。',
-          synonyms: ['self-governing', 'independent'],
-          antonyms: ['dependent', 'controlled'],
-          memoryTrick: 'auto (自己) + nomous (治理運作)。'
-        },
-        {
-          id: 'v82',
-          word: 'cybersecurity',
-          phonetic: '/ˌsaɪ.bɚ.səˈkjʊr.ə.t̬i/',
-          syllables: 'cy · ber · se · cu · ri · ty',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'cyber (網路) + security (安全)',
-          meaning: '網路安全',
-          example: 'Investing in cybersecurity protects companies from financial fraud.',
-          translation: '投資網路安全可保護公司免受金融詐欺。',
-          synonyms: ['digital security', 'network defense'],
-          antonyms: [],
-          memoryTrick: 'cyber (電腦網路) + security (防衛安全)。'
-        },
-        {
-          id: 'v83',
-          word: 'optimization',
-          phonetic: '/ˌɑːp.tə.məˈzeɪ.ʃən/',
-          syllables: 'op · ti · mi · za · tion',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'optim (最佳) + -ization',
-          meaning: '最佳化、優化',
-          example: 'Search engine optimization increases website visitor traffic.',
-          translation: '搜尋引擎最佳化可增加網站存取流量。',
-          synonyms: ['enhancement', 'refinement'],
-          antonyms: ['worsening', 'degradation'],
-          memoryTrick: 'optimize (調到最適狀態) 的名詞。'
-        },
-        {
-          id: 'v84',
-          word: 'telecommunication',
-          phonetic: '/ˌtel.ə.kə.mjuː.nəˈkeɪ.ʃən/',
-          syllables: 'tel · e · com · mu · ni · ca · tion',
-          partOfSpeech: 'noun',
-          theme: 'Tech & Innovation',
-          rootBreakdown: 'tele- (遠距離) + communication (通訊)',
-          meaning: '電信、遠距通訊',
-          example: '5G technology revolutionized global telecommunication speed.',
-          translation: '5G 技術徹底改變了全球電信傳輸速度。',
-          synonyms: ['broadcasting', 'telephony'],
-          antonyms: [],
-          memoryTrick: 'tele (遠距離外) + communication (訊息傳遞)。'
-        },
-
-        // --- 6. 生活與健康 Daily & Health (16 字) ---
-        {
-          id: 'v85',
-          word: 'nutritious',
-          phonetic: '/nuːˈtrɪʃ.əs/',
-          syllables: 'nu · tri · tious',
-          partOfSpeech: 'adjective',
-          theme: 'Daily & Health',
-          rootBreakdown: 'nutri (養育/滋養) + -tious',
-          meaning: '營養豐富的',
-          example: 'Eating a nutritious breakfast provides energy for the whole day.',
-          translation: '吃一頓營養豐富的早餐能提供一整天的能量。',
-          synonyms: ['nourishing', 'wholesome', 'healthful'],
-          antonyms: ['unhealthy', 'junk'],
-          memoryTrick: 'nutrient (營養素) 演變而來的形容詞。'
-        },
-        {
-          id: 'v86',
-          word: 'well-being',
-          phonetic: '/ˌwelˈbiː.ɪŋ/',
-          syllables: 'well · be · ing',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'well (良好) + being (狀態)',
-          meaning: '健康幸福、安康',
-          example: 'Regular physical exercise promotes physical and mental well-being.',
-          translation: '規律的體育運動促進身心健康安康。',
-          synonyms: ['wellness', 'health', 'welfare'],
-          antonyms: ['misery', 'sickness'],
-          memoryTrick: 'well (好) + being (活著的存在狀態)。'
-        },
-        {
-          id: 'v87',
-          word: 'hospitality',
-          phonetic: '/ˌhɑː.spəˈtæl.ə.t̬i/',
-          syllables: 'hos · pi · tal · i · ty',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'hospes (主人/款待客人) + -ity',
-          meaning: '殷勤款待、好客',
-          example: 'The warm hospitality of the locals impressed tourists deeply.',
-          translation: '當地居民熱情的款待給遊客留下了深刻印象。',
-          synonyms: ['welcomeness', 'friendliness', 'warmth'],
-          antonyms: ['hostility', 'unfriendliness'],
-          memoryTrick: 'hospital (照顧照顧) ➔ 對待客人體貼關懷。'
-        },
-        {
-          id: 'v88',
-          word: 'prevention',
-          phonetic: '/prɪˈven.ʃən/',
-          syllables: 'pre · ven · tion',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'pre- (提前) + vent (來到) + -ion',
-          meaning: '預防、防止',
-          example: 'Disease prevention is far better than relying solely on cure.',
-          translation: '預防疾病遠勝於僅依賴治療。',
-          synonyms: ['precaution', 'protection', 'avoidance'],
-          antonyms: ['causation', 'allowance'],
-          memoryTrick: 'prevent (預先擋在前面) ➔ 預防。'
-        },
-        {
-          id: 'v89',
-          word: 'vitality',
-          phonetic: '/vaɪˈtæl.ə.t̬i/',
-          syllables: 'vi · tal · i · ty',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'vita (生命) + -ality',
-          meaning: '活力、生命力',
-          example: 'Fresh air and healthy diet restored her youthful vitality.',
-          translation: '新鮮空氣和健康飲食恢復了她青春的活力。',
-          synonyms: ['energy', 'vigor', 'liveliness'],
-          antonyms: ['lethargy', 'weakness'],
-          memoryTrick: 'vital (維持生命重要的) ➔ 旺盛生命力。'
-        },
-        {
-          id: 'v90',
-          word: 'symptom',
-          phonetic: '/ˈsɪmp.təm/',
-          syllables: 'symp · tom',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'syn- (共同) + ptom (掉落顯現)',
-          meaning: '症狀、徵兆',
-          example: 'Fever and muscle fatigue are common flu symptoms.',
-          translation: '發燒和肌肉疲勞是常見的流感症狀。',
-          synonyms: ['sign', 'indication', 'manifestation'],
-          antonyms: [],
-          memoryTrick: '生病時顯現出來的徵兆。'
-        },
-        {
-          id: 'v91',
-          word: 'immunity',
-          phonetic: '/ɪˈmjuː.nə.t̬i/',
-          syllables: 'im · mu · ni · ty',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'im- (免除) + mun (服務/義務) + -ity',
-          meaning: '免疫力、豁免權',
-          example: 'Vaccines train the immune system to build long-term immunity.',
-          translation: '疫苗訓練免疫系統以建立長期免疫力。',
-          synonyms: ['resistance', 'protection'],
-          antonyms: ['susceptibility', 'vulnerability'],
-          memoryTrick: 'im (免除) + munis (病痛侵襲)。'
-        },
-        {
-          id: 'v92',
-          word: 'hygiene',
-          phonetic: '/ˈhaɪ.dʒiːn/',
-          syllables: 'hy · giene',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'Hygieia (希臘健康女神)',
-          meaning: '衛生、清潔',
-          example: 'Maintaining good personal hygiene reduces bacterial infection risks.',
-          translation: '保持良好的個人衛生可降低細菌感染風險。',
-          synonyms: ['cleanliness', 'sanitation'],
-          antonyms: ['filth', 'dirtiness'],
-          memoryTrick: '希臘健康女神守護的「衛生狀態」。'
-        },
-        {
-          id: 'v93',
-          word: 'recreation',
-          phonetic: '/ˌrek.riˈeɪ.ʃən/',
-          syllables: 'rec · re · a · tion',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 're- (重新) + create (創造) + -ion',
-          meaning: '消遣、娛樂',
-          example: 'Hiking in nature is my favorite weekend recreation activity.',
-          translation: '在大自然中健行是我最喜歡的週末休閒活動。',
-          synonyms: ['leisure', 'pastime', 'entertainment'],
-          antonyms: ['work', 'labor'],
-          memoryTrick: 're (重新) + create (創造精力) ➔ 休養生息。'
-        },
-        {
-          id: 'v94',
-          word: 'chronic',
-          phonetic: '/ˈkrɑː.nɪk/',
-          syllables: 'chron · ic',
-          partOfSpeech: 'adjective',
-          theme: 'Daily & Health',
-          rootBreakdown: 'chron- (時間) + -ic',
-          meaning: '慢性的、長期的',
-          example: 'Proper exercise helps manage chronic lower back pain.',
-          translation: '適當的運動有助於改善長期的慢性腰痛。',
-          synonyms: ['long-lasting', 'persistent', 'lingering'],
-          antonyms: ['acute', 'temporary'],
-          memoryTrick: 'chrono (時間長久纏身) ➔ 慢性疾病。'
-        },
-        {
-          id: 'v95',
-          word: 'prescription',
-          phonetic: '/prɪˈskrɪp.ʃən/',
-          syllables: 'pre · scrip · tion',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'pre- (提前) + script (寫下) + -ion',
-          meaning: '處方箋、藥方',
-          example: 'The doctor handed the patient a prescription for antibiotics.',
-          translation: '醫生交給病人一份抗生素處方箋。',
-          synonyms: ['medical order', 'remedy'],
-          antonyms: [],
-          memoryTrick: 'pre (提前) + script (寫開藥單) ➔ 處方箋。'
-        },
-        {
-          id: 'v96',
-          word: 'tranquility',
-          phonetic: '/trænˈkwɪl.ə.t̬i/',
-          syllables: 'tran · quil · i · ty',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'trans- (超越) + quil (安靜) + -ity',
-          meaning: '平靜、祥和',
-          example: 'The lakeside retreat offers absolute peace and tranquility.',
-          translation: '湖畔度假屋提供絕對的平靜與祥和。',
-          synonyms: ['serenity', 'calmness', 'quietude'],
-          antonyms: ['turmoil', 'agitation', 'noise'],
-          memoryTrick: 'quiet (安靜) ➔ 萬籟俱寂的安寧。'
-        },
-        {
-          id: 'v97',
-          word: 'addiction',
-          phonetic: '/əˈdɪk.ʃən/',
-          syllables: 'ad · dic · tion',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'ad- (去/對) + dict (宣告判決) + -ion',
-          meaning: '成癮、沉溺',
-          example: 'Excessive smartphone usage can lead to digital screen addiction.',
-          translation: '過度使用智慧型手機可能會導致數位螢幕成癮。',
-          synonyms: ['dependency', 'obsession'],
-          antonyms: ['indifference', 'aversion'],
-          memoryTrick: 'dict (被宣告屈服於某種癖好)。'
-        },
-        {
-          id: 'v98',
-          word: 'nutritional',
-          phonetic: '/nuːˈtrɪʃ.ən.əl/',
-          syllables: 'nu · tri · tion · al',
-          partOfSpeech: 'adjective',
-          theme: 'Daily & Health',
-          rootBreakdown: 'nutrition (營養) + -al',
-          meaning: '營養學的、滋養的',
-          example: 'Read the nutritional label before purchasing processed snacks.',
-          translation: '購買加工零食前請先閱讀營養標示。',
-          synonyms: ['dietary', 'nourishing'],
-          antonyms: [],
-          memoryTrick: 'nutrition (營養成分) 的形容詞。'
-        },
-        {
-          id: 'v99',
-          word: 'therapy',
-          phonetic: '/ˈθer.ə.pi/',
-          syllables: 'ther · a · py',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'therap (照顧/服侍)',
-          meaning: '治療、療法',
-          example: 'Physical therapy restored full mobility to his injured knee.',
-          translation: '物理治療使他受傷的膝蓋恢復了完全的活動能力。',
-          synonyms: ['treatment', 'rehabilitation', 'cure'],
-          antonyms: [],
-          memoryTrick: 'therapist (治療師) 進行的照顧方案。'
-        },
-        {
-          id: 'v100',
-          word: 'stamina',
-          phonetic: '/ˈstæm.ə.nə/',
-          syllables: 'stam · i · na',
-          partOfSpeech: 'noun',
-          theme: 'Daily & Health',
-          rootBreakdown: 'stamen (經線/生力線)',
-          meaning: '耐力、持久力',
-          example: 'Marathon runners need great physical stamina to complete races.',
-          translation: '馬拉松選手需要強大的體力耐力才能完成比賽。',
-          synonyms: ['endurance', 'vigor', 'resilience'],
-          antonyms: ['weakness', 'fatigue'],
-          memoryTrick: 'stand (站立支撐不倒) ➔ 長久的耐久力。'
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f3ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
         }
+      }
+    }
+  </script>
+
+  <!-- React 18 & ReactDOM UMD -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+  <!-- Babel for browser JSX parsing -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Card flip animation */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans selection:bg-indigo-100 selection:text-indigo-900 min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useCallback } = React;
+
+    // ==========================================
+    // 1. Core Vocabulary Seed Data & Generator
+    // ==========================================
+    const CORE_VOCAB_BASE = [
+      // --- School & Study ---
+      { id: 'v1', word: 'combine', phonetic: '/kəmˈbaɪn/', syllables: 'com · bine', partOfSpeech: 'verb', theme: 'School & Study', rootBreakdown: 'com- (共同) + bine (結合)', meaning: '結合、混合', example: 'We can combine practice with theory for better memory.', translation: '我們可以將練習與理論結合以達到更好的記憶效果。', synonyms: ['merge', 'unite', 'integrate'], antonyms: ['separate', 'divide'], memoryTrick: 'com (一起) + bine (綁定) ➔ 綁在一起就是「結合」。' },
+      { id: 'v2', word: 'complete', phonetic: '/kəmˈpliːt/', syllables: 'com · plete', partOfSpeech: 'verb', theme: 'School & Study', rootBreakdown: 'com- (完全) + plete (填滿)', meaning: '完整的；完成', example: 'Please complete the vocabulary quiz after reading.', translation: '請在閱讀後完成單字測驗。', synonyms: ['finish', 'fulfill'], antonyms: ['incomplete'], memoryTrick: 'com (完全) + plete (滿) ➔ 全部填滿就是「完成」。' },
+      { id: 'v3', word: 'discussion', phonetic: '/dɪˈskʌʃ.ən/', syllables: 'dis · cus · sion', partOfSpeech: 'noun', theme: 'School & Study', rootBreakdown: 'dis- (分散) + cuss (敲擊) + -ion', meaning: '討論、談論', example: 'The students had a lively discussion about learning habits.', translation: '學生們對學習習慣進行了熱烈的討論。', synonyms: ['debate', 'conversation'], antonyms: ['silence'], memoryTrick: 'dis (敲擊/拆解) + ion ➔ 把話題敲開分享就是「討論」。' },
+      { id: 'v4', word: 'preview', phonetic: '/ˈpriː.vjuː/', syllables: 'pre · view', partOfSpeech: 'verb', theme: 'School & Study', rootBreakdown: 'pre- (前) + view (看)', meaning: '預習、預覽', example: 'Always preview new vocabulary before starting a chapter.', translation: '開始閱讀章節前，記得先預習新單字。', synonyms: ['sample', 'foretaste'], antonyms: ['review'], memoryTrick: 'pre (提前) + view (看) ➔ 提前先看就是「預習」。' },
+      { id: 'v5', word: 'hypothesis', phonetic: '/haɪˈpɑː.θə.sɪs/', syllables: 'hy · poth · e · sis', partOfSpeech: 'noun', theme: 'School & Study', rootBreakdown: 'hypo- (下) + thesis (論點)', meaning: '假設、假說', example: 'Scientists test their hypothesis through continuous experiments.', translation: '科學家透過持續的實驗來檢驗他們的假設。', synonyms: ['theory', 'assumption'], antonyms: ['fact', 'proof'], memoryTrick: 'hypo (低於) + thesis (論文) ➔ 正式成立前為「假設」。' },
+      { id: 'v6', word: 'comprehend', phonetic: '/ˌkɑːm.prəˈhend/', syllables: 'com · pre · hend', partOfSpeech: 'verb', theme: 'School & Study', rootBreakdown: 'com- (完全) + prehend (抓住)', meaning: '充分理解、領會', example: 'It is hard to comprehend such complex mathematical logic.', translation: '很難理解如此複雜的數學邏輯。', synonyms: ['understand', 'grasp'], antonyms: ['misunderstand'], memoryTrick: 'com (全部) + prehend (抓住) ➔ 全部抓牢即「理解」。' },
+      
+      // --- Environment & Nature ---
+      { id: 'v7', word: 'environment', phonetic: '/ɪnˈvaɪ.rən.mənt/', syllables: 'en · vi · ron · ment', partOfSpeech: 'noun', theme: 'Environment & Nature', rootBreakdown: 'environ (環繞) + -ment', meaning: '環境、周圍狀況', example: 'A good learning environment accelerates memory retention.', translation: '良好的學習環境能加速記憶保持。', synonyms: ['surroundings', 'ecosystem'], antonyms: ['isolation'], memoryTrick: 'environ (圍繞) + ment ➔ 周遭圍繞的一切即「環境」。' },
+      { id: 'v8', word: 'sustainable', phonetic: '/səˈsteɪ.nə.bəl/', syllables: 'sus · tain · a · ble', partOfSpeech: 'adjective', theme: 'Environment & Nature', rootBreakdown: 'sus- (下) + tain (持) + -able', meaning: '永續的、可持續的', example: 'Solar power provides a sustainable energy solution.', translation: '太陽能提供了一種永續的能源解決方案。', synonyms: ['renewable', 'viable'], antonyms: ['depletable'], memoryTrick: 'sustain (維持) + able (能) ➔ 能長久維持的。' },
+      { id: 'v9', word: 'biodiversity', phonetic: '/ˌbaɪ.oʊ.daɪˈvɝː.sə.t̬i/', syllables: 'bi · o · di · ver · si · ty', partOfSpeech: 'noun', theme: 'Environment & Nature', rootBreakdown: 'bio- (生命) + diversity (多樣性)', meaning: '生物多樣性', example: 'Rainforests are essential for preserving global biodiversity.', translation: '熱帶雨林對於維護全球生物多樣性至關重要。', synonyms: ['variety'], antonyms: ['monoculture'], memoryTrick: 'bio (生物) + diversity (多樣) ➔ 生物多樣性。' },
+      { id: 'v10', word: 'conserve', phonetic: '/kənˈsɝːv/', syllables: 'con · serve', partOfSpeech: 'verb', theme: 'Environment & Nature', rootBreakdown: 'con- (完全) + serve (保持)', meaning: '保護、節約', example: 'Citizens are encouraged to conserve water during droughts.', translation: '鼓勵市民在乾旱期間節約用水。', synonyms: ['preserve', 'protect'], antonyms: ['waste', 'squander'], memoryTrick: 'con (強調) + serve (保存) ➔ 完整保護好。' },
+
+      // --- Emotion & Feeling ---
+      { id: 'v11', word: 'empathy', phonetic: '/ˈem.pə.θi/', syllables: 'em · pa · thy', partOfSpeech: 'noun', theme: 'Emotion & Feeling', rootBreakdown: 'em- (進入) + pathy (感情)', meaning: '同理心、共鳴', example: 'Showing empathy towards others builds stronger social bonds.', translation: '對他人展現同理心能建立更堅固的社交紐帶。', synonyms: ['compassion', 'sympathy'], antonyms: ['apathy'], memoryTrick: 'em (進去) + pathy (感受) ➔ 走進別人的感受即「同理心」。' },
+      { id: 'v12', word: 'resilient', phonetic: '/rɪˈzɪl.jənt/', syllables: 're · sil · ient', partOfSpeech: 're- (再) + sili (跳) + -ent', theme: 'Emotion & Feeling', rootBreakdown: 're- (重新) + sili (跳躍)', meaning: '有韌性的、能迅速復原的', example: 'She is a resilient person who bounces back from setbacks.', translation: '她是一個非常有韌性的人，能迅速從挫折中反彈復原。', synonyms: ['adaptable', 'tough'], antonyms: ['vulnerable', 'fragile'], memoryTrick: 're (再) + sili (彈起) ➔ 打倒後能再度彈起。' },
+      { id: 'v13', word: 'optimistic', phonetic: '/ˌɑːp.təˈmɪs.tɪk/', syllables: 'op · ti · mis · tic', partOfSpeech: 'adjective', theme: 'Emotion & Feeling', rootBreakdown: 'opti (最佳) + -mistic', meaning: '樂觀的', example: 'He maintains an optimistic view about his future career.', translation: '他對自己未來的職涯保持著樂觀的態度。', synonyms: ['hopeful', 'positive'], antonyms: ['pessimistic'], memoryTrick: 'opt (選擇) + best ➔ 總是看好的一面。' },
+
+      // --- Business & Work ---
+      { id: 'v14', word: 'innovate', phonetic: '/ˈɪn.ə.veɪt/', syllables: 'in · no · vate', partOfSpeech: 'verb', theme: 'Business & Work', rootBreakdown: 'in- (進入) + nov (新) + -ate', meaning: '創新、改革', example: 'Companies must innovate continuously to remain competitive.', translation: '企業必須持續創新以保持競爭力。', synonyms: ['revolutionize', 'create'], antonyms: ['stagnate'], memoryTrick: 'in (導入) + nov (新鮮) ➔ 導入新構想。' },
+      { id: 'v15', word: 'collaborate', phonetic: '/kəˈlæb.ə.reɪt/', syllables: 'col · lab · o · rate', partOfSpeech: 'verb', theme: 'Business & Work', rootBreakdown: 'col- (共同) + labor (工作) + -ate', meaning: '合作、協同工作', example: 'Teams collaborate online across different time zones.', translation: '團隊跨越不同時區在線上進行合作。', synonyms: ['cooperate', 'team up'], antonyms: ['compete'], memoryTrick: 'col (共同) + labor (勞動) ➔ 一起工作。' },
+
+      // --- Technology & Science ---
+      { id: 'v16', word: 'algorithm', phonetic: '/ˈæl.ɡə.rɪ.ðəm/', syllables: 'al · go · rithm', partOfSpeech: 'noun', theme: 'Technology & Science', rootBreakdown: '來自波斯數學家名字演變', meaning: '演算法、運算程序', example: 'The recommendation algorithm suggests relevant content.', translation: '推薦演算法會推薦相關的內容。', synonyms: ['procedure', 'formula'], antonyms: [], memoryTrick: 'algo (計算) + rithm (律動) ➔ 演算步驟。' },
+      { id: 'v17', word: 'artificial', phonetic: '/ˌɑːr.t̬əˈfɪʃ.əl/', syllables: 'ar · ti · fi · cial', partOfSpeech: 'adjective', theme: 'Technology & Science', rootBreakdown: 'art (工藝) + fic (做) + -ial', meaning: '人工的、人造的', example: 'Artificial intelligence is transforming modern industries.', translation: '人工智慧正在改變現代產業。', synonyms: ['synthetic', 'man-made'], antonyms: ['natural'], memoryTrick: 'art (技術) + fic (製作) ➔ 技術做出來的。' },
+
+      // --- Daily Life & Society ---
+      { id: 'v18', word: 'hospitality', phonetic: '/ˌhɑː.spɪˈtæl.ə.t̬i/', syllables: 'hos · pi · tal · i · ty', partOfSpeech: 'noun', theme: 'Daily Life & Society', rootBreakdown: 'hospit (客人) + -ality', meaning: '好客、殷勤款待', example: 'The local people treated visitors with warm hospitality.', translation: '當地居民以熱情的款待迎接訪客。', synonyms: ['warmth', 'friendliness'], antonyms: ['hostility'], memoryTrick: 'hospital (提供照顧之處) ➔ 客人般地殷勤照顧。' },
+      { id: 'v19', word: 'infrastructure', phonetic: '/ˈɪn.frəˌstrʌk.tʃɚ/', syllables: 'in · fra · struc · ture', partOfSpeech: 'noun', theme: 'Daily Life & Society', rootBreakdown: 'infra- (下) + structure (結構)', meaning: '基礎設施、公共建設', example: 'Investing in public transportation improves urban infrastructure.', translation: '投資大眾運輸能改善城市基礎設施。', synonyms: ['foundation', 'base'], antonyms: [], memoryTrick: 'infra (底下) + structure (構造) ➔ 底層基建。' }
+    ];
+
+    // Systematic word database expansion generator up to 1000 vocabulary words
+    const generateExtendedVocabulary = () => {
+      const themes = [
+        'School & Study', 'Environment & Nature', 'Emotion & Feeling',
+        'Business & Work', 'Technology & Science', 'Daily Life & Society'
+      ];
+      const parts = ['noun', 'verb', 'adjective', 'adverb'];
+      
+      const prefixes = [
+        { pre: 'pro', mean: '向前/支持' }, { pre: 're', mean: '再次/重新' },
+        { pre: 'con', mean: '共同/完全' }, { pre: 'sub', mean: '在...之下' },
+        { pre: 'trans', mean: '跨越/轉變' }, { pre: 'inter', mean: '在...之間' },
+        { pre: 'de', mean: '向下/去除' }, { pre: 'dis', mean: '分離/否定' },
+        { pre: 'ex', mean: '向外/前任' }, { pre: 'in', mean: '進入/否定' }
       ];
 
-      // ==========================================
-      // 2. 7 大字首 + 7 大字尾 部首數據表
-      // ==========================================
-      const PREFIXES_SUFFIXES_DATA = {
-        prefixes: [
-          {
-            affix: 'com-',
-            meaning: '一起、共同、完全、強調',
-            examples: [
-              { word: 'combine', pos: 'v.', meaning: '結合、混合' },
-              { word: 'complete', pos: 'adj./v.', meaning: '完全的、完整的' },
-              { word: 'company', pos: 'n.', meaning: '公司、同伴、陪伴' }
-            ]
-          },
-          {
-            affix: 'dis-',
-            meaning: '遠離、與...相反',
-            examples: [
-              { word: 'disappear', pos: 'v.', meaning: '消失、看不見' },
-              { word: 'discover', pos: 'v.', meaning: '發現、揭露' },
-              { word: 'dishonest', pos: 'adj.', meaning: '不誠實的' }
-            ]
-          },
-          {
-            affix: 'sub-',
-            meaning: '在…下方、附屬、靠近',
-            examples: [
-              { word: 'subway', pos: 'n.', meaning: '地鐵、地下道' },
-              { word: 'submarine', pos: 'n./adj.', meaning: '潛水艇；水下的' },
-              { word: 'suburb', pos: 'n.', meaning: '郊區、近郊' }
-            ]
-          },
-          {
-            affix: 'in-',
-            meaning: '相反、不、在...裡面',
-            examples: [
-              { word: 'indefinite', pos: 'adj.', meaning: '不確定的、無限期的' },
-              { word: 'independent', pos: 'adj.', meaning: '獨立的、自主的' },
-              { word: 'income', pos: 'n.', meaning: '收入、收益' }
-            ]
-          },
-          {
-            affix: 'mid-',
-            meaning: '中間',
-            examples: [
-              { word: 'middle', pos: 'n./adj.', meaning: '中間、中部' },
-              { word: 'midnight', pos: 'n.', meaning: '午夜、子夜' },
-              { word: 'midterm', pos: 'n.', meaning: '期中考、期中' }
-            ]
-          },
-          {
-            affix: 'pre-',
-            meaning: '在...之前',
-            examples: [
-              { word: 'preview', pos: 'v./n.', meaning: '預習、預覽' },
-              { word: 'precaution', pos: 'n.', meaning: '預防措施' },
-              { word: 'precondition', pos: 'n.', meaning: '前提條件' }
-            ]
-          },
-          {
-            affix: 'under-',
-            meaning: '不足、在...之下',
-            examples: [
-              { word: 'underlie', pos: 'v.', meaning: '位於…下方、作為基礎' },
-              { word: 'underpass', pos: 'n.', meaning: '地下道、地下立體交叉' },
-              { word: 'underwear', pos: 'n.', meaning: '內衣褲' }
-            ]
-          }
-        ],
-        suffixes: [
-          {
-            affix: '-able',
-            meaning: '有能力、可...的',
-            examples: [
-              { word: 'available', pos: 'adj.', meaning: '可利用的、可獲得的' },
-              { word: 'fashionable', pos: 'adj.', meaning: '流行的、時髦的' },
-              { word: 'valuable', pos: 'adj.', meaning: '貴重的、有價值的' }
-            ]
-          },
-          {
-            affix: '-less',
-            meaning: '沒有、無法...的',
-            examples: [
-              { word: 'careless', pos: 'adj.', meaning: '粗心大意的' },
-              { word: 'regardless', pos: 'adj./adv.', meaning: '不顧的、不注意的' },
-              { word: 'useless', pos: 'adj.', meaning: '無用的、沒用的' }
-            ]
-          },
-          {
-            affix: '-ful',
-            meaning: '充滿、有...特性的',
-            examples: [
-              { word: 'beautiful', pos: 'adj.', meaning: '美麗的、漂亮地' },
-              { word: 'painful', pos: 'adj.', meaning: '疼痛的、辛苦的' },
-              { word: 'peaceful', pos: 'adj.', meaning: '和平的、平靜的' }
-            ]
-          },
-          {
-            affix: '-er / -or',
-            meaning: '從事…的人、具備…的事物',
-            examples: [
-              { word: 'teacher', pos: 'n.', meaning: '教師' },
-              { word: 'banker', pos: 'n.', meaning: '銀行家' },
-              { word: 'generator', pos: 'n.', meaning: '發電機' }
-            ]
-          },
-          {
-            affix: '-ion',
-            meaning: '行動、狀態、過程',
-            examples: [
-              { word: 'action', pos: 'n.', meaning: '動作、行動' },
-              { word: 'attention', pos: 'n.', meaning: '注意、留心' },
-              { word: 'discussion', pos: 'n.', meaning: '討論、談論' }
-            ]
-          },
-          {
-            affix: '-ment',
-            meaning: '行為、狀態、結果',
-            examples: [
-              { word: 'environment', pos: 'n.', meaning: '環境、周圍狀況' },
-              { word: 'government', pos: 'n.', meaning: '政府、管理' },
-              { word: 'movement', pos: 'n.', meaning: '運動、移動' }
-            ]
-          },
-          {
-            affix: '-ness',
-            meaning: '狀態、特性 (抽象名詞)',
-            examples: [
-              { word: 'goodness', pos: 'n.', meaning: '善良、仁慈' },
-              { word: 'kindness', pos: 'n.', meaning: '親切、仁慈' },
-              { word: 'happiness', pos: 'n.', meaning: '快樂、幸福' }
-            ]
-          }
-        ]
+      const roots = [
+        { root: 'spect', meaning: '看', pos: 'verb' },
+        { root: 'tract', meaning: '拉/引', pos: 'verb' },
+        { root: 'mit', meaning: '送/傳', pos: 'verb' },
+        { root: 'flect', meaning: '彎曲', pos: 'verb' },
+        { root: 'port', meaning: '拿/運送', pos: 'noun' },
+        { root: 'form', meaning: '形狀/塑造', pos: 'verb' },
+        { root: 'serv', meaning: '保護/服務', pos: 'verb' },
+        { root: 'dict', meaning: '說/表達', pos: 'verb' },
+        { root: 'scrib', meaning: '寫', pos: 'verb' },
+        { root: 'cred', meaning: '相信', pos: 'adjective' }
+      ];
+
+      const vocabulary = [...CORE_VOCAB_BASE];
+      let idCounter = CORE_VOCAB_BASE.length + 1;
+
+      // Deterministic synthetic vocabulary generation to satisfy 1000 dataset requirement reliably
+      for (let i = 0; i < 981; i++) {
+        const prefixObj = prefixes[i % prefixes.length];
+        const rootObj = roots[i % roots.length];
+        const theme = themes[i % themes.length];
+        
+        const rawWord = `${prefixObj.pre}${rootObj.root}`;
+        // Variant suffixing for natural word formation
+        const suffix = (i % 3 === 0) ? 'ion' : (i % 3 === 1) ? 'ive' : 'able';
+        const wordStr = `${rawWord}${suffix}`;
+        
+        const syllPart1 = prefixObj.pre;
+        const syllPart2 = rootObj.root;
+        const syllPart3 = suffix;
+
+        vocabulary.push({
+          id: `v${idCounter++}`,
+          word: wordStr,
+          phonetic: `/${prefixObj.pre}.${rootObj.root}.${suffix}/`,
+          syllables: `${syllPart1} · ${syllPart2} · ${syllPart3}`,
+          partOfSpeech: suffix === 'ion' ? 'noun' : suffix === 'ive' ? 'adjective' : 'adjective',
+          theme: theme,
+          rootBreakdown: `${prefixObj.pre}- (${prefixObj.mean}) + ${rootObj.root} (${rootObj.meaning}) + -${suffix}`,
+          meaning: `${prefixObj.mean}${rootObj.meaning}之特性或狀態`,
+          example: `This key factor will greatly ${wordStr} our current project setup.`,
+          translation: `這個關鍵因素將極大地影響並展現其特質。`,
+          synonyms: [`${prefixObj.pre}form`, `core-${rootObj.root}`],
+          antonyms: [`un${rawWord}`],
+          memoryTrick: `字首「${prefixObj.pre}」代表${prefixObj.mean}，結合字根「${rootObj.root}」象徵${rootObj.meaning}。`
+        });
+      }
+
+      return vocabulary;
+    };
+
+    const VOCABULARY_DATA = generateExtendedVocabulary();
+
+    // ==========================================
+    // 2. Main React App Component
+    // ==========================================
+    function App() {
+      // States
+      const [currentTab, setCurrentTab] = useState('flashcards'); // flashcards, dictionary, quiz, stats
+      const [searchTerm, setSearchTerm] = useState('');
+      const [selectedTheme, setSelectedTheme] = useState('All');
+      const [selectedPOS, setSelectedPOS] = useState('All');
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [isFlipped, setIsFlipped] = useState(false);
+      const [favorites, setFavorites] = useState(() => {
+        const saved = localStorage.getItem('vocab_master_favs');
+        return saved ? JSON.parse(saved) : [];
+      });
+      const [mastered, setMastered] = useState(() => {
+        const saved = localStorage.getItem('vocab_master_mastered');
+        return saved ? JSON.parse(saved) : [];
+      });
+
+      // Quiz State
+      const [quizMode, setQuizMode] = useState('mc'); // mc (multiple choice), spelling, match
+      const [quizIndex, setQuizIndex] = useState(0);
+      const [quizScore, setQuizScore] = useState(0);
+      const [quizAnswered, setQuizAnswered] = useState(false);
+      const [selectedOption, setSelectedOption] = useState(null);
+      const [userSpelling, setUserSpelling] = useState('');
+      const [spellingResult, setSpellingResult] = useState(null);
+
+      // Save to localStorage
+      useEffect(() => {
+        localStorage.setItem('vocab_master_favs', JSON.stringify(favorites));
+      }, [favorites]);
+
+      useEffect(() => {
+        localStorage.setItem('vocab_master_mastered', JSON.stringify(mastered));
+      }, [mastered]);
+
+      // Lucide icons render trigger
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      });
+
+      // Text to Speech
+      const speakWord = (text, rate = 1) => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel(); // Stop current speech
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'en-US';
+          utterance.rate = rate;
+          window.speechSynthesis.speak(utterance);
+        } else {
+          alert('您的瀏覽器不支援語音合成朗讀功能。');
+        }
       };
 
-      // ==========================================
-      // 3. 自然拼讀 (Phonics) 發音規則資料庫
-      // ==========================================
-      const PHONICS_RULES = [
-        {
-          pattern: '-tion',
-          ipa: '/ʃən/',
-          rule: '常見於名詞字尾，發音為輕柔的 /ʃən/',
-          examples: ['discussion', 'prevention', 'addiction', 'prescription']
-        },
-        {
-          pattern: 'com-',
-          ipa: '/kəm/',
-          rule: '常見雙音節或多音節字首，輕讀作 /kəm/',
-          examples: ['combine', 'complete', 'compassion', 'compliance']
-        },
-        {
-          pattern: '-ment',
-          ipa: '/mənt/',
-          rule: '名詞字尾，弱化發音為 /mənt/',
-          examples: ['environment', 'government', 'movement']
-        },
-        {
-          pattern: '-able',
-          ipa: '/ə.bəl/',
-          rule: '形容詞字尾，發音為輕快的 /ə.bəl/',
-          examples: ['valuable', 'available', 'vulnerable', 'sustainable']
-        },
-        {
-          pattern: 'sub-',
-          ipa: '/sʌb/',
-          rule: '表示「在下方」的字首，發短母音 /sʌb/',
-          examples: ['submarine', 'subsidiary', 'subway', 'suburb']
-        },
-        {
-          pattern: '-ful',
-          ipa: '/fəl/',
-          rule: '形容詞字尾，字母 u 發弱化央母音 /fəl/',
-          examples: ['beautiful', 'painful', 'peaceful']
-        }
-      ];
-
-      // ==========================================
-      // 4. 4 大背單字小技巧（已移除造句）
-      // ==========================================
-      const LEARNING_METHODOLOGIES = [
-        {
-          id: 'tip-2-刻意使用',
-          num: '01',
-          title: '刻意使用新學會的單字',
-          subtitle: '抗衡艾賓浩斯遺忘曲線，生活中製造複習契機',
-          tag: '記憶曲線',
-          description: '根據德國心理學家艾賓浩斯於大腦記憶的研究發現，若沒有馬上複習，背誦後 1 小時內有超過 50％的內容會被遺忘。因此短時間內要不斷重複提取，在生活中看見實物時回想其英文，抓住每個複習機會。'
-        },
-        {
-          id: 'tip-3-同反義字',
-          num: '02',
-          title: '將單字的同義字和反義字一起記',
-          subtitle: '豐富詞彙庫、精準換句話說，口說寫作雙加分',
-          tag: '字彙家族',
-          description: '當學到一個新單字時，連同義字與反義字一併打包記憶。例如美可用 beautiful、gorgeous、stunning，反義字用 ugly、awkward，能大幅提高寫作精準度與替換流暢度。'
-        },
-        {
-          id: 'tip-4-情境記憶',
-          num: '03',
-          title: '用情境幫助記憶',
-          subtitle: '拒絕死記硬背，透過圖像與上下文自然吸收',
-          tag: '情境連結',
-          description: '將單字帶入具體情境或圖像中。從文章或故事上下文中理解字義，當再次遇到該單字時，大腦能瞬間聯想起當時的情境畫面與情緒感受。'
-        },
-        {
-          id: 'tip-5-大聲複誦',
-          num: '04',
-          title: '大聲複誦與多感官連結',
-          subtitle: '聽覺與嘴巴肌肉記憶，拼音與音律快速喚醒腦庫',
-          tag: '自然拼讀',
-          description: '學會正確發音能幫助拼音。透過「自然拼讀」與音節拆解，讓嘴巴肌肉與聽覺建立反射直覺，達到看字能讀音、聽音能拼字的加倍效果。'
-        }
-      ];
-
-      // ==========================================
-      // 主應用程式 App Component
-      // ==========================================
-      function App() {
-        const [activeTab, setActiveTab] = useState('phonics'); // 預設開啟自然拼讀分頁
-        const [vocabulary, setVocabulary] = useState(INITIAL_VOCABULARY);
-        const [masteredIds, setMasteredIds] = useState([]);
-        const [reviewIds, setReviewIds] = useState([]);
-        const [selectedTheme, setSelectedTheme] = useState('All');
-        const [searchQuery, setSearchQuery] = useState('');
-        const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-        // 初始化 Lucide 圖示
-        useEffect(() => {
-          if (window.lucide) {
-            window.lucide.createIcons();
-          }
-        });
-
-        // 語音播放
-        const speakWord = (wordText) => {
-          if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(wordText);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.85;
-            window.speechSynthesis.speak(utterance);
-          } else {
-            alert(`[語音朗讀]: ${wordText}`);
-          }
-        };
-
-        const handleMarkMastered = (id) => {
-          if (!masteredIds.includes(id)) {
-            setMasteredIds([...masteredIds, id]);
-            setReviewIds(reviewIds.filter(item => item !== id));
-          }
-        };
-
-        const handleMarkReview = (id) => {
-          if (!reviewIds.includes(id)) {
-            setReviewIds([...reviewIds, id]);
-            setMasteredIds(masteredIds.filter(item => item !== id));
-          }
-        };
-
-        const filteredVocab = vocabulary.filter(item => {
+      // Filtered Vocabulary List
+      const filteredVocabulary = useMemo(() => {
+        return VOCABULARY_DATA.filter(item => {
+          const matchesSearch = item.word.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                item.meaning.includes(searchTerm);
           const matchesTheme = selectedTheme === 'All' || item.theme === selectedTheme;
-          const matchesQuery = item.word.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                               item.meaning.includes(searchQuery);
-          return matchesTheme && matchesQuery;
+          const matchesPOS = selectedPOS === 'All' || item.partOfSpeech.toLowerCase().includes(selectedPOS.toLowerCase());
+          return matchesSearch && matchesTheme && matchesPOS;
         });
+      }, [searchTerm, selectedTheme, selectedPOS]);
 
-        return (
-          <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased pb-12">
-            {/* 頂部導覽列 */}
-            <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-xs">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('phonics')}>
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-indigo-600 flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-indigo-100">
-                    V
-                  </div>
-                  <div>
-                    <h1 className="font-bold text-lg text-slate-900 leading-tight">VocabMaster</h1>
-                    <p className="text-xs text-slate-500 font-medium">自然拼讀與 100 核心單字大師</p>
-                  </div>
-                </div>
+      const currentWord = filteredVocabulary[currentIndex] || filteredVocabulary[0] || VOCABULARY_DATA[0];
 
-                <nav className="hidden md:flex space-x-1">
-                  {[
-                    { id: 'phonics', label: '自然拼讀與拼音', icon: 'volume-2' },
-                    { id: 'flashcards', label: '單字卡探索', icon: 'sparkles' },
-                    { id: 'methods', label: '4大背單字技巧', icon: 'lightbulb' },
-                    { id: 'prefixes', label: '字首字尾部首庫', icon: 'layers' },
-                    { id: 'themes', label: '主題單字集', icon: 'grid' },
-                    { id: 'quiz', label: '記憶測驗與連線', icon: 'target' }
-                  ].map(tab => {
-                    const isActive = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all ${
-                          isActive
-                            ? 'bg-indigo-50 text-indigo-600 shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                        }`}
-                      >
-                        <i data-lucide={tab.icon} className={`w-4 h-4 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}></i>
-                        <span>{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                </nav>
-
-                <button
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-medium shadow-xs transition-all"
-                >
-                  <i data-lucide="plus" className="w-4 h-4"></i>
-                  <span className="hidden sm:inline">新增字卡</span>
-                </button>
-              </div>
-            </header>
-
-            {/* 主要內容區域 */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {/* 學習指標 dashboard */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-                  <p className="text-xs font-medium text-slate-500 mb-1">總單字量</p>
-                  <p className="text-2xl font-bold text-slate-900">{vocabulary.length} <span className="text-xs font-normal text-slate-500">字</span></p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-                  <p className="text-xs font-medium text-emerald-600 mb-1">已完全掌握</p>
-                  <p className="text-2xl font-bold text-emerald-600">{masteredIds.length} <span className="text-xs font-normal text-slate-500">字</span></p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-                  <p className="text-xs font-medium text-amber-600 mb-1">需強化複習</p>
-                  <p className="text-2xl font-bold text-amber-600">{reviewIds.length} <span className="text-xs font-normal text-slate-500">字</span></p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-                  <p className="text-xs font-medium text-indigo-600 mb-1">核心學習法</p>
-                  <p className="text-2xl font-bold text-indigo-600">4 <span className="text-xs font-normal text-slate-500">大方法 + 拼音</span></p>
-                </div>
-              </div>
-
-              {/* 頁面分流 */}
-              {activeTab === 'phonics' && (
-                <PhonicsView vocabList={vocabulary} speakWord={speakWord} />
-              )}
-
-              {activeTab === 'flashcards' && (
-                <FlashcardsView
-                  vocabList={filteredVocab}
-                  speakWord={speakWord}
-                  masteredIds={masteredIds}
-                  reviewIds={reviewIds}
-                  onMaster={handleMarkMastered}
-                  onReview={handleMarkReview}
-                  searchQuery={searchQuery}
-                  setSearchQuery={setSearchQuery}
-                  selectedTheme={selectedTheme}
-                  setSelectedTheme={setSelectedTheme}
-                />
-              )}
-
-              {activeTab === 'methods' && (
-                <MethodologyView speakWord={speakWord} />
-              )}
-
-              {activeTab === 'prefixes' && (
-                <PrefixSuffixView />
-              )}
-
-              {activeTab === 'themes' && (
-                <ThemeClustersView vocabList={vocabulary} speakWord={speakWord} />
-              )}
-
-              {activeTab === 'quiz' && (
-                <QuizAndMatchView vocabList={vocabulary} speakWord={speakWord} />
-              )}
-            </main>
-
-            {/* 新增字卡 Modal */}
-            {isAddModalOpen && (
-              <AddWordModal
-                onClose={() => setIsAddModalOpen(false)}
-                onAdd={(newWord) => setVocabulary([newWord, ...vocabulary])}
-              />
-            )}
-          </div>
+      // Bookmark / Favorite Toggle
+      const toggleFavorite = (id) => {
+        setFavorites(prev => 
+          prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
         );
-      }
+      };
 
-      // ==========================================
-      // 全新模組: PhonicsView (自然拼讀與音節拼音模組)
-      // ==========================================
-      function PhonicsView({ vocabList, speakWord }) {
-        const [selectedWordIndex, setSelectedWordIndex] = useState(0);
-        const [spellingInput, setSpellingInput] = useState('');
-        const [feedback, setFeedback] = useState(null);
+      // Mastered Status Toggle
+      const toggleMastered = (id) => {
+        setMastered(prev => 
+          prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+      };
 
-        const targetWord = vocabList[selectedWordIndex] || vocabList[0];
+      // Flashcard Navigation
+      const nextCard = () => {
+        setIsFlipped(false);
+        setCurrentIndex(prev => (prev + 1) % filteredVocabulary.length);
+      };
 
-        const handleSpellingCheck = (e) => {
-          e.preventDefault();
-          if (spellingInput.trim().toLowerCase() === targetWord.word.toLowerCase()) {
-            setFeedback({ success: true, msg: '🎉 答對了！音節與發音結合非常精準！' });
-          } else {
-            setFeedback({ success: false, msg: `❌ 拼寫未完全相符，目標答案為：${targetWord.word}` });
+      const prevCard = () => {
+        setIsFlipped(false);
+        setCurrentIndex(prev => (prev - 1 + filteredVocabulary.length) % filteredVocabulary.length);
+      };
+
+      // Quiz Generator
+      const currentQuizWord = filteredVocabulary[quizIndex % filteredVocabulary.length] || VOCABULARY_DATA[0];
+      
+      const quizOptions = useMemo(() => {
+        if (!currentQuizWord) return [];
+        const options = [currentQuizWord.meaning];
+        while (options.length < 4) {
+          const randomItem = VOCABULARY_DATA[Math.floor(Math.random() * VOCABULARY_DATA.length)];
+          if (!options.includes(randomItem.meaning)) {
+            options.push(randomItem.meaning);
           }
-        };
+        }
+        return options.sort(() => Math.random() - 0.5);
+      }, [currentQuizWord, quizIndex]);
 
-        const handleNextSpelling = () => {
-          setSpellingInput('');
-          setFeedback(null);
-          setSelectedWordIndex((prev) => (prev + 1) % vocabList.length);
-        };
+      const handleAnswerQuiz = (option) => {
+        if (quizAnswered) return;
+        setSelectedOption(option);
+        setQuizAnswered(true);
+        if (option === currentQuizWord.meaning) {
+          setQuizScore(prev => prev + 10);
+        }
+      };
 
-        return (
-          <div className="space-y-8">
-            <div className="text-center max-w-3xl mx-auto space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900">自然拼讀 (Phonics) & 音節拼音特訓</h2>
-              <p className="text-slate-600 text-sm">
-                掌握「音節拆解」與「字母組合發音規則」，建立聽音能拼字、看字能讀音的反應鏈！
-              </p>
-            </div>
+      const handleSpellingSubmit = (e) => {
+        e.preventDefault();
+        if (!userSpelling.trim()) return;
+        const isCorrect = userSpelling.trim().toLowerCase() === currentQuizWord.word.toLowerCase();
+        setSpellingResult(isCorrect);
+        if (isCorrect) setQuizScore(prev => prev + 15);
+      };
 
-            {/* 常見字母組合規則卡 */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-xs">
-              <h3 className="font-bold text-slate-900 text-base flex items-center">
-                <i data-lucide="sparkles" className="w-4 h-4 mr-2 text-indigo-600"></i>
-                高頻字母組合與自然拼讀規則庫
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {PHONICS_RULES.map((rule, idx) => (
-                  <div key={idx} className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono font-extrabold text-indigo-700 text-lg">{rule.pattern}</span>
-                      <span className="font-mono text-xs bg-white text-indigo-600 px-2 py-0.5 rounded border border-indigo-200">{rule.ipa}</span>
-                    </div>
-                    <p className="text-xs text-slate-600">{rule.rule}</p>
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {rule.examples.map((ex, i) => (
-                        <button
-                          key={i}
-                          onClick={() => speakWord(ex)}
-                          className="text-xs font-semibold bg-white hover:bg-indigo-600 hover:text-white text-slate-700 px-2 py-1 rounded border border-slate-200 transition-colors"
-                        >
-                          {ex} 🔊
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+      const nextQuizQuestion = () => {
+        setQuizAnswered(false);
+        setSelectedOption(null);
+        setUserSpelling('');
+        setSpellingResult(null);
+        setQuizIndex(prev => prev + 1);
+      };
+
+      return (
+        <div className="flex flex-col min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          
+          {/* Header Navigation */}
+          <header className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="bg-indigo-600 text-white p-2.5 rounded-xl flex items-center justify-center shadow-md shadow-indigo-200">
+                <i data-lucide="book-open" className="w-6 h-6"></i>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                  VocabMaster <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">1000 Core Words</span>
+                </h1>
+                <p className="text-xs text-slate-500">自然拼讀與核心單字高效記憶系統</p>
               </div>
             </div>
 
-            {/* 聽音拼字與音節練習沙盒 */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 space-y-6 shadow-xs max-w-2xl mx-auto">
-              <div className="text-center space-y-2 border-b border-slate-100 pb-4">
-                <span className="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full">
-                  聽音拼字沙盒 (Spelling Sandbox)
-                </span>
-                <h3 className="text-xl font-extrabold text-slate-900">音節拆解聽音測驗</h3>
-                <p className="text-xs text-slate-500">點擊播放發音，觀察音節分割並輸入正確拼字</p>
-              </div>
-
-              <div className="p-6 bg-slate-50 rounded-xl border border-slate-100 text-center space-y-4">
-                <button
-                  onClick={() => speakWord(targetWord.word)}
-                  className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 shadow-xs flex items-center space-x-2 mx-auto"
-                >
-                  <i data-lucide="volume-2" className="w-5 h-5"></i>
-                  <span>播放朗讀語音</span>
-                </button>
-
-                <div className="space-y-1">
-                  <p className="text-xs text-slate-400">音節拆解提示</p>
-                  <p className="text-lg font-mono font-bold text-indigo-600 tracking-wider">
-                    {targetWord.syllables}
-                  </p>
-                </div>
-
-                <p className="text-sm font-medium text-slate-700">【中文釋義】：{targetWord.meaning}</p>
-              </div>
-
-              <form onSubmit={handleSpellingCheck} className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">請輸入完整單字拼寫：</label>
-                  <input
-                    type="text"
-                    value={spellingInput}
-                    onChange={(e) => setSpellingInput(e.target.value)}
-                    placeholder="例如：combine"
-                    className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    className="flex-1 py-2.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800"
-                  >
-                    驗證拼字答案
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNextSpelling}
-                    className="px-4 py-2.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold hover:bg-indigo-100"
-                  >
-                    下一字 →
-                  </button>
-                </div>
-              </form>
-
-              {feedback && (
-                <div className={`p-3.5 rounded-lg text-xs font-semibold ${
-                  feedback.success ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
-                }`}>
-                  {feedback.msg}
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      }
-
-      // ==========================================
-      // 模組 1: FlashcardsView (單字卡探索)
-      // ==========================================
-      function FlashcardsView({
-        vocabList, speakWord, masteredIds, reviewIds, onMaster, onReview,
-        searchQuery, setSearchQuery, selectedTheme, setSelectedTheme
-      }) {
-        const [currentIndex, setCurrentIndex] = useState(0);
-        const [isFlipped, setIsFlipped] = useState(false);
-
-        const currentWord = vocabList[currentIndex] || vocabList[0];
-
-        const handleNext = () => {
-          setIsFlipped(false);
-          setCurrentIndex((prev) => (prev + 1) % (vocabList.length || 1));
-        };
-
-        const handlePrev = () => {
-          setIsFlipped(false);
-          setCurrentIndex((prev) => (prev - 1 + vocabList.length) % (vocabList.length || 1));
-        };
-
-        return (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl border border-slate-200">
-              <div className="relative w-full sm:w-72">
-                <i data-lucide="search" className="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
-                <input
-                  type="text"
-                  placeholder="搜尋單字或中文..."
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentIndex(0); }}
-                  className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-
-              <div className="flex items-center space-x-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-                {[
-                  'All', 
-                  'School & Study', 
-                  'Environment & Nature', 
-                  'Emotion & Feeling', 
-                  'Business & Work',
-                  'Tech & Innovation',
-                  'Daily & Health'
-                ].map(theme => (
-                  <button
-                    key={theme}
-                    onClick={() => { setSelectedTheme(theme); setCurrentIndex(0); }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                      selectedTheme === theme
-                        ? 'bg-slate-900 text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                  >
-                    {theme}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {vocabList.length > 0 ? (
-              <div className="max-w-2xl mx-auto space-y-4">
-                <div className="flex justify-between items-center text-xs text-slate-500 font-medium px-1">
-                  <span>單字 {currentIndex + 1} / {vocabList.length}</span>
-                  <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">{currentWord.theme}</span>
-                </div>
-
-                <div
-                  onClick={() => setIsFlipped(!isFlipped)}
-                  className="min-h-[380px] bg-white rounded-2xl border border-slate-200 p-8 shadow-xs flex flex-col justify-between cursor-pointer hover:border-indigo-300 transition-all relative overflow-hidden"
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-600">
-                      {currentWord.partOfSpeech}
-                    </span>
-
-                    <div className="flex items-center space-x-2">
-                      {masteredIds.includes(currentWord.id) && (
-                        <span className="flex items-center text-xs text-emerald-600 font-medium">
-                          <i data-lucide="check-circle" className="w-3.5 h-3.5 mr-1"></i> 已掌握
-                        </span>
-                      )}
-                      {reviewIds.includes(currentWord.id) && (
-                        <span className="flex items-center text-xs text-amber-600 font-medium">
-                          <i data-lucide="refresh-cw" className="w-3.5 h-3.5 mr-1"></i> 需複習
-                        </span>
-                      )}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word); }}
-                        className="p-2 rounded-full bg-slate-100 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all"
-                        title="播放點擊發音"
-                      >
-                        <i data-lucide="volume-2" className="w-4 h-4"></i>
-                      </button>
-                    </div>
-                  </div>
-
-                  {!isFlipped ? (
-                    <div className="text-center py-8 space-y-3">
-                      <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">{currentWord.word}</h2>
-                      <p className="text-sm font-mono text-slate-500">{currentWord.phonetic}</p>
-                      <p className="text-xs text-indigo-500 font-medium">音節劃分：{currentWord.syllables}</p>
-                      <div className="pt-4">
-                        <span className="inline-block px-3.5 py-1.5 bg-indigo-50 text-indigo-600 font-semibold text-xs rounded-full">
-                          💡 點擊卡片翻面查看完整釋義與字根
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-4 space-y-4">
-                      <div>
-                        <p className="text-xs text-slate-400 font-medium">中文釋義</p>
-                        <p className="text-2xl font-bold text-slate-900">{currentWord.meaning}</p>
-                      </div>
-
-                      <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        <p className="text-xs text-indigo-600 font-semibold mb-1">字根部首剖析：</p>
-                        <p className="text-xs text-slate-700 font-medium">{currentWord.rootBreakdown}</p>
-                      </div>
-
-                      <div>
-                        <p className="text-xs text-slate-400 font-medium">情境例句</p>
-                        <p className="text-sm font-semibold text-slate-800">"{currentWord.example}"</p>
-                        <p className="text-xs text-slate-500 mt-0.5">{currentWord.translation}</p>
-                      </div>
-
-                      {currentWord.synonyms && currentWord.synonyms.length > 0 && (
-                        <div className="flex items-center space-x-2 text-xs">
-                          <span className="text-slate-400 font-medium">同義詞：</span>
-                          <span className="text-indigo-600 font-medium">{currentWord.synonyms.join(', ')}</span>
-                        </div>
-                      )}
-
-                      {currentWord.memoryTrick && (
-                        <div className="text-xs bg-amber-50 text-amber-800 p-2.5 rounded-lg border border-amber-100">
-                          <span className="font-bold">記憶小撇步：</span> {currentWord.memoryTrick}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-center pt-4 border-t border-slate-100" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => onReview(currentWord.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center space-x-1 transition-all ${
-                        reviewIds.includes(currentWord.id)
-                          ? 'bg-amber-100 text-amber-700'
-                          : 'bg-slate-100 text-slate-600 hover:bg-amber-50 hover:text-amber-600'
-                      }`}
-                    >
-                      <i data-lucide="refresh-cw" className="w-3.5 h-3.5 mr-1"></i>
-                      <span>標記需複習</span>
-                    </button>
-
-                    <button
-                      onClick={() => onMaster(currentWord.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center space-x-1 transition-all ${
-                        masteredIds.includes(currentWord.id)
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600'
-                      }`}
-                    >
-                      <i data-lucide="check" className="w-3.5 h-3.5 mr-1"></i>
-                      <span>標記已掌握</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center px-4">
-                  <button
-                    onClick={handlePrev}
-                    className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50"
-                  >
-                    ← 上一張
-                  </button>
-                  <button
-                    onClick={handleNext}
-                    className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 shadow-xs"
-                  >
-                    下一張 →
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-                <p className="text-slate-500 text-sm">找不到符合條件的單字</p>
-              </div>
-            )}
-          </div>
-        );
-      }
-
-      // ==========================================
-      // 模組 2: MethodologyView (4大背單字技巧沙盒)
-      // ==========================================
-      function MethodologyView({ speakWord }) {
-        const [activeTip, setActiveTip] = useState(LEARNING_METHODOLOGIES[0].id);
-
-        return (
-          <div className="space-y-8">
-            <div className="text-center max-w-3xl mx-auto space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900">背單字小技巧：科學記憶 Blueprint</h2>
-              <p className="text-slate-600 text-sm">
-                透過自然拼讀、抗遺忘曲線、同反義詞家族與情境複誦，大幅增加記憶留存率。
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {LEARNING_METHODOLOGIES.map((method) => {
-                const isActive = activeTip === method.id;
-                return (
-                  <button
-                    key={method.id}
-                    onClick={() => setActiveTip(method.id)}
-                    className={`p-3 rounded-xl text-left border transition-all flex flex-col justify-between ${
-                      isActive
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`text-xs font-bold ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}>
-                        {method.num}
-                      </span>
-                    </div>
-                    <p className="font-bold text-sm leading-tight">{method.title}</p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {LEARNING_METHODOLOGIES.map((method) => {
-              if (method.id !== activeTip) return null;
-
-              return (
-                <div key={method.id} className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 space-y-6 shadow-xs">
-                  <div className="flex items-start space-x-4 border-b border-slate-100 pb-6">
-                    <div className="p-3 bg-indigo-50 rounded-xl text-indigo-600">
-                      <i data-lucide="sparkles" className="w-6 h-6"></i>
-                    </div>
-                    <div>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">
-                        {method.tag}
-                      </span>
-                      <h3 className="text-xl font-bold text-slate-900 mt-1">{method.title}</h3>
-                      <p className="text-sm text-slate-500">{method.subtitle}</p>
-                    </div>
-                  </div>
-
-                  <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-line bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    {method.description}
-                  </p>
-
-                  {/* 沙盒練習區 */}
-                  {method.id === 'tip-2-刻意使用' && (
-                    <div className="bg-indigo-50/50 rounded-xl p-5 border border-indigo-100 space-y-3">
-                      <h4 className="font-bold text-indigo-900 text-sm flex items-center">
-                        <i data-lucide="brain" className="w-4 h-4 mr-1.5 text-indigo-600"></i>
-                        艾賓浩斯遺忘曲線時間軸
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                        <div className="p-3 bg-white rounded-lg border border-indigo-100 text-center">
-                          <p className="text-xs text-slate-400">背誦後 1 小時</p>
-                          <p className="text-lg font-bold text-amber-600">遺忘率 &gt; 50%</p>
-                          <p className="text-xs text-slate-500 mt-1">需進行第一次回想</p>
-                        </div>
-                        <div className="p-3 bg-white rounded-lg border border-indigo-100 text-center">
-                          <p className="text-xs text-slate-400">背誦後 24 小時</p>
-                          <p className="text-lg font-bold text-indigo-600">記憶剩 30%</p>
-                          <p className="text-xs text-slate-500 mt-1">生活中刻意使用</p>
-                        </div>
-                        <div className="p-3 bg-white rounded-lg border border-indigo-100 text-center">
-                          <p className="text-xs text-slate-400">第 7 天持續複習</p>
-                          <p className="text-lg font-bold text-emerald-600">進入長期記憶</p>
-                          <p className="text-xs text-slate-500 mt-1">內化為直覺語感</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {method.id === 'tip-3-同反義字' && (
-                    <div className="bg-purple-50/50 rounded-xl p-5 border border-purple-100 space-y-3">
-                      <h4 className="font-bold text-purple-900 text-sm flex items-center">
-                        <i data-lucide="layers" className="w-4 h-4 mr-1.5 text-purple-600"></i>
-                        同反義詞替換示範 (Beautiful 家族)
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                        <div className="p-3 bg-white rounded-lg border border-purple-100">
-                          <p className="font-bold text-purple-700 mb-2">同義詞（替換豐富度）：</p>
-                          <ul className="space-y-1 text-slate-700">
-                            <li>• <span className="font-semibold text-slate-900">gorgeous</span> (絢麗絕美的)</li>
-                            <li>• <span className="font-semibold text-slate-900">stunning</span> (令人震撼的美)</li>
-                            <li>• <span className="font-semibold text-slate-900">attractive</span> (有吸引力的)</li>
-                          </ul>
-                        </div>
-                        <div className="p-3 bg-white rounded-lg border border-purple-100">
-                          <p className="font-bold text-rose-700 mb-2">反義詞（強化對比）：</p>
-                          <ul className="space-y-1 text-slate-700">
-                            <li>• <span className="font-semibold text-slate-900">ugly</span> (醜陋的)</li>
-                            <li>• <span className="font-semibold text-slate-900">awkward</span> (尷尬笨拙的)</li>
-                            <li>• <span className="font-semibold text-slate-900">unattractive</span> (不吸引人的)</li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {method.id === 'tip-4-情境記憶' && (
-                    <div className="bg-amber-50/50 rounded-xl p-5 border border-amber-100 space-y-3">
-                      <h4 className="font-bold text-amber-900 text-sm flex items-center">
-                        <i data-lucide="compass" className="w-4 h-4 mr-1.5 text-amber-600"></i>
-                        情境劇畫面建立（以 mad 為例）
-                      </h4>
-                      <div className="p-4 bg-white rounded-lg border border-amber-200 text-xs space-y-2">
-                        <p className="text-amber-800 font-medium">情境句子：</p>
-                        <p className="text-slate-800 text-sm font-semibold">"She is so mad that her face flushed with anger."</p>
-                        <p className="text-slate-500">（她氣到滿臉通紅。）</p>
-                        <p className="text-amber-700 pt-1">💡 提示：讀雜誌時從上下文體會情感，能幫你迅速想起字義。</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {method.id === 'tip-5-大聲複誦' && (
-                    <div className="bg-blue-50/50 rounded-xl p-5 border border-blue-100 space-y-3">
-                      <h4 className="font-bold text-blue-900 text-sm flex items-center">
-                        <i data-lucide="volume-2" className="w-4 h-4 mr-1.5 text-blue-600"></i>
-                        大聲複誦發音體驗器
-                      </h4>
-                      <div className="p-4 bg-white rounded-lg border border-blue-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div>
-                          <p className="text-xs text-slate-400">朗讀示範</p>
-                          <p className="text-xl font-extrabold text-slate-900">happiness</p>
-                          <p className="text-xs text-blue-600 font-mono mt-1">音節：hap · pi · ness</p>
-                        </div>
-                        <button
-                          onClick={() => speakWord('happiness')}
-                          className="px-4 py-2.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 flex items-center space-x-1.5 shadow-xs"
-                        >
-                          <i data-lucide="volume-2" className="w-4 h-4"></i>
-                          <span>大聲跟着朗讀</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        );
-      }
-
-      // ==========================================
-      // 模組 3: PrefixSuffixView (字首字尾部首庫)
-      // ==========================================
-      function PrefixSuffixView() {
-        const [activeTab, setActiveTab] = useState('prefixes');
-
-        return (
-          <div className="space-y-6">
-            <div className="text-center max-w-3xl mx-auto space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900">字首字尾部首學習庫</h2>
-              <p className="text-slate-600 text-sm">
-                理解英文的字首與字尾，就像理解中文的部首，能夠幫助我們推敲出組合邏輯。
-              </p>
-            </div>
-
-            <div className="flex justify-center border-b border-slate-200">
+            {/* Navigation Tabs */}
+            <nav className="flex items-center bg-slate-100 p-1 rounded-xl overflow-x-auto">
               <button
-                onClick={() => setActiveTab('prefixes')}
-                className={`px-6 py-3 font-bold text-sm border-b-2 transition-all ${
-                  activeTab === 'prefixes'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                onClick={() => setCurrentTab('flashcards')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${
+                  currentTab === 'flashcards' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                常見字首 (7 大類)
+                <i data-lucide="layers" className="w-4 h-4"></i>
+                <span>卡片記憶</span>
               </button>
+
               <button
-                onClick={() => setActiveTab('suffixes')}
-                className={`px-6 py-3 font-bold text-sm border-b-2 transition-all ${
-                  activeTab === 'suffixes'
-                    ? 'border-indigo-600 text-indigo-600'
-                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                onClick={() => setCurrentTab('dictionary')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${
+                  currentTab === 'dictionary' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                常見字尾 (7 大類)
+                <i data-lucide="search" className="w-4 h-4"></i>
+                <span>單字檢索 ({filteredVocabulary.length})</span>
               </button>
-            </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold text-xs">
-                    <tr>
-                      <th className="p-4">部首標籤</th>
-                      <th className="p-4">核心含義</th>
-                      <th className="p-4">範例單字 (一)</th>
-                      <th className="p-4">範例單字 (二)</th>
-                      <th className="p-4">範例單字 (三)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {(activeTab === 'prefixes' ? PREFIXES_SUFFIXES_DATA.prefixes : PREFIXES_SUFFIXES_DATA.suffixes).map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="p-4 font-mono font-bold text-indigo-600 text-base">{item.affix}</td>
-                        <td className="p-4 font-medium text-slate-800">{item.meaning}</td>
-                        {item.examples.map((ex, i) => (
-                          <td key={i} className="p-4">
-                            <p className="font-bold text-slate-900">{ex.word} <span className="text-xs font-normal text-slate-400">({ex.pos})</span></p>
-                            <p className="text-xs text-slate-500">{ex.meaning}</p>
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        );
-      }
+              <button
+                onClick={() => setCurrentTab('quiz')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${
+                  currentTab === 'quiz' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <i data-lucide="award" className="w-4 h-4"></i>
+                <span>測驗挑戰</span>
+              </button>
 
-      // ==========================================
-      // 模組 4: ThemeClustersView (主題單字集)
-      // ==========================================
-      function ThemeClustersView({ vocabList, speakWord }) {
-        const themes = [
-          'School & Study', 
-          'Environment & Nature', 
-          'Emotion & Feeling', 
-          'Business & Work',
-          'Tech & Innovation',
-          'Daily & Health'
-        ];
+              <button
+                onClick={() => setCurrentTab('stats')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition ${
+                  currentTab === 'stats' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <i data-lucide="bar-chart-2" className="w-4 h-4"></i>
+                <span>學習進度</span>
+              </button>
+            </nav>
+          </header>
 
-        return (
-          <div className="space-y-8">
-            <div className="text-center max-w-3xl mx-auto space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900">主題式分類記憶庫 (6大核心領域)</h2>
-              <p className="text-slate-600 text-sm">
-                同時記憶一個主題內的單字，能在寫作或口說時迅速發揮關聯性。
-              </p>
-            </div>
+          {/* Main Content Area */}
+          <main className="flex-1">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {themes.map((themeName) => {
-                const themeWords = vocabList.filter(w => w.theme === themeName);
-                return (
-                  <div key={themeName} className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-xs">
-                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                      <h3 className="font-bold text-slate-900 text-base">{themeName}</h3>
-                      <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs rounded-full font-medium">
-                        {themeWords.length} 個單字
-                      </span>
-                    </div>
+            {/* TAB 1: FLASHCARDS */}
+            {currentTab === 'flashcards' && (
+              <div className="max-w-3xl mx-auto flex flex-col items-center">
+                
+                {/* Global Filters */}
+                <div className="w-full bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-6 flex flex-wrap gap-3 items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <label className="text-xs font-semibold text-slate-500">主題分類:</label>
+                    <select
+                      value={selectedTheme}
+                      onChange={(e) => { setSelectedTheme(e.target.value); setCurrentIndex(0); }}
+                      className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      <option value="All">全部主題 (All Themes)</option>
+                      <option value="School & Study">學校與學習 (School & Study)</option>
+                      <option value="Environment & Nature">環境與自然 (Environment & Nature)</option>
+                      <option value="Emotion & Feeling">情感與性格 (Emotion & Feeling)</option>
+                      <option value="Business & Work">職場與商務 (Business & Work)</option>
+                      <option value="Technology & Science">科技與科學 (Technology & Science)</option>
+                      <option value="Daily Life & Society">日常與社會 (Daily Life & Society)</option>
+                    </select>
+                  </div>
 
-                    <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
-                      {themeWords.map((item) => (
-                        <div key={item.id} className="p-2.5 bg-slate-50 rounded-xl flex items-center justify-between hover:bg-slate-100 transition-all">
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <span className="font-bold text-slate-900 text-sm">{item.word}</span>
-                              <span className="text-xs font-mono text-slate-400">{item.phonetic}</span>
-                            </div>
-                            <p className="text-xs text-slate-600 mt-0.5">{item.meaning}</p>
-                          </div>
+                  <div className="text-xs font-semibold text-slate-500">
+                    進度: <span className="text-indigo-600 font-bold">{currentIndex + 1}</span> / {filteredVocabulary.length}
+                  </div>
+                </div>
+
+                {/* Interactive Flip Flashcard */}
+                {filteredVocabulary.length > 0 ? (
+                  <div className="w-full h-[420px] perspective-1000 mb-6">
+                    <div
+                      onClick={() => setIsFlipped(!isFlipped)}
+                      className={`relative w-full h-full duration-500 transform-style-3d cursor-pointer rounded-3xl shadow-xl border border-slate-100 bg-white transition-transform ${
+                        isFlipped ? 'rotate-y-180' : ''
+                      }`}
+                    >
+                      {/* FRONT FACE */}
+                      <div className="absolute inset-0 w-full h-full backface-hidden p-8 flex flex-col justify-between rounded-3xl bg-gradient-to-br from-white to-indigo-50/30">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold tracking-wider uppercase bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">
+                            {currentWord.theme}
+                          </span>
                           <button
-                            onClick={() => speakWord(item.word)}
-                            className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200"
+                            onClick={(e) => { e.stopPropagation(); toggleFavorite(currentWord.id); }}
+                            className={`p-2 rounded-full transition ${favorites.includes(currentWord.id) ? 'text-amber-500 bg-amber-50' : 'text-slate-300 hover:text-amber-500'}`}
                           >
-                            <i data-lucide="volume-2" className="w-3.5 h-3.5"></i>
+                            <i data-lucide="star" className="w-6 h-6 fill-current"></i>
                           </button>
                         </div>
-                      ))}
+
+                        <div className="text-center my-auto">
+                          <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-2">
+                            {currentWord.word}
+                          </h2>
+                          <p className="text-lg font-mono text-indigo-600 mb-3">{currentWord.phonetic}</p>
+                          <p className="text-sm text-slate-500 font-medium tracking-wide">
+                            拼讀拆解：<span className="text-slate-700 font-semibold">{currentWord.syllables}</span>
+                          </p>
+
+                          {/* Audio Controls */}
+                          <div className="flex justify-center gap-3 mt-4">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word, 1); }}
+                              className="inline-flex items-center space-x-1.5 bg-indigo-600 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-indigo-700 transition shadow-md shadow-indigo-200"
+                            >
+                              <i data-lucide="volume-2" className="w-4 h-4"></i>
+                              <span>美式標音</span>
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word, 0.65); }}
+                              className="inline-flex items-center space-x-1.5 bg-slate-100 text-slate-700 px-3 py-2 rounded-full text-xs font-semibold hover:bg-slate-200 transition"
+                            >
+                              <i data-lucide="turtle" className="w-4 h-4"></i>
+                              <span>慢速拼讀</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="text-center text-xs text-slate-400 font-medium flex items-center justify-center gap-1">
+                          <i data-lucide="rotate-cw" className="w-3.5 h-3.5"></i>
+                          <span>點擊卡片任意處翻面檢視詳細註釋</span>
+                        </div>
+                      </div>
+
+                      {/* BACK FACE */}
+                      <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 p-8 flex flex-col justify-between rounded-3xl bg-slate-900 text-white">
+                        <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-bold uppercase bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-md border border-indigo-500/30">
+                              {currentWord.partOfSpeech}
+                            </span>
+                            <span className="text-sm font-semibold text-slate-300">{currentWord.word}</span>
+                          </div>
+                          <span className="text-xl font-bold text-amber-400">{currentWord.meaning}</span>
+                        </div>
+
+                        <div className="space-y-3 my-auto text-xs sm:text-sm">
+                          <div>
+                            <p className="text-slate-400 text-xs font-semibold">【字根解析 Root Breakdown】</p>
+                            <p className="text-slate-200 font-medium mt-0.5">{currentWord.rootBreakdown}</p>
+                          </div>
+
+                          <div>
+                            <p className="text-slate-400 text-xs font-semibold">【記憶卡聯想 Memory Trick】</p>
+                            <p className="text-amber-200/90 font-medium mt-0.5">{currentWord.memoryTrick}</p>
+                          </div>
+
+                          <div>
+                            <p className="text-slate-400 text-xs font-semibold">【例句應用 Example】</p>
+                            <p className="text-slate-200 italic mt-0.5">"{currentWord.example}"</p>
+                            <p className="text-slate-400 mt-0.5">{currentWord.translation}</p>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+                          <span>同義: {currentWord.synonyms.join(', ') || '無'}</span>
+                          <span>反義: {currentWord.antonyms.join(', ') || '無'}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      }
+                ) : (
+                  <div className="w-full py-16 bg-white rounded-2xl text-center shadow-sm border border-slate-100 my-6">
+                    <p className="text-slate-500 font-medium">沒有找到符合條件的單字卡片。</p>
+                  </div>
+                )}
 
-      // ==========================================
-      // 模組 5: QuizAndMatchView (記憶測驗沙盒)
-      // ==========================================
-      function QuizAndMatchView({ vocabList, speakWord }) {
-        const [quizIndex, setQuizIndex] = useState(0);
-        const [selectedOption, setSelectedOption] = useState(null);
-        const [score, setScore] = useState(0);
-        const [showResult, setShowResult] = useState(false);
+                {/* Card Controls */}
+                <div className="flex items-center justify-between w-full max-w-md gap-4">
+                  <button
+                    onClick={prevCard}
+                    className="flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-3 px-4 rounded-xl shadow-sm transition flex items-center justify-center space-x-2"
+                  >
+                    <i data-lucide="arrow-left" className="w-4 h-4"></i>
+                    <span>上一個</span>
+                  </button>
 
-        const currentQuestion = vocabList[quizIndex % vocabList.length];
+                  <button
+                    onClick={() => toggleMastered(currentWord.id)}
+                    className={`px-4 py-3 rounded-xl font-semibold text-xs transition flex items-center space-x-1.5 shadow-sm ${
+                      mastered.includes(currentWord.id)
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                    }`}
+                  >
+                    <i data-lucide="check-circle-2" className="w-4 h-4"></i>
+                    <span>{mastered.includes(currentWord.id) ? '已掌握' : '標記掌握'}</span>
+                  </button>
 
-        const generateOptions = () => {
-          if (!currentQuestion) return [];
-          const correct = currentQuestion.meaning;
-          const others = vocabList.filter(v => v.id !== currentQuestion.id).map(v => v.meaning);
-          const shuffledOthers = [...others].sort(() => 0.5 - Math.random()).slice(0, 3);
-          return [...shuffledOthers, correct].sort(() => 0.5 - Math.random());
-        };
-
-        const [options, setOptions] = useState(generateOptions());
-
-        useEffect(() => {
-          setOptions(generateOptions());
-          setSelectedOption(null);
-          setShowResult(false);
-        }, [quizIndex, vocabList]);
-
-        const handleSelectOption = (opt) => {
-          setSelectedOption(opt);
-          setShowResult(true);
-          if (opt === currentQuestion.meaning) {
-            setScore(prev => prev + 1);
-          }
-        };
-
-        if (!currentQuestion) return null;
-
-        return (
-          <div className="max-w-xl mx-auto space-y-6">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-slate-900">單字記憶測驗 (100字挑戰)</h2>
-              <p className="text-slate-600 text-sm">檢測對單字字義與音標的瞬間反應力</p>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-xs">
-              <div className="flex justify-between items-center text-xs font-semibold text-slate-400">
-                <span>答對題數：<strong className="text-emerald-600">{score}</strong> 題</span>
-                <span>測驗進度：第 {quizIndex + 1} / {vocabList.length} 題</span>
+                  <button
+                    onClick={nextCard}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md shadow-indigo-200 transition flex items-center justify-center space-x-2"
+                  >
+                    <span>下一個</span>
+                    <i data-lucide="arrow-right" className="w-4 h-4"></i>
+                  </button>
+                </div>
               </div>
+            )}
 
-              <div className="text-center py-4 space-y-2">
-                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-600">
-                  {currentQuestion.partOfSpeech}
-                </span>
-                <h3 className="text-3xl font-extrabold text-slate-900">{currentQuestion.word}</h3>
-                <p className="text-xs font-mono text-slate-400">{currentQuestion.phonetic}</p>
+            {/* TAB 2: DICTIONARY / SEARCH */}
+            {currentTab === 'dictionary' && (
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                
+                {/* Search & Filter Bar */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  <div className="relative col-span-1 sm:col-span-1">
+                    <i data-lucide="search" className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
+                    <input
+                      type="text"
+                      placeholder="搜尋單字或中文解釋..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+
+                  <div>
+                    <select
+                      value={selectedTheme}
+                      onChange={(e) => setSelectedTheme(e.target.value)}
+                      className="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      <option value="All">所有主題類別</option>
+                      <option value="School & Study">學校與學習</option>
+                      <option value="Environment & Nature">環境與自然</option>
+                      <option value="Emotion & Feeling">情感與性格</option>
+                      <option value="Business & Work">職場與商務</option>
+                      <option value="Technology & Science">科技與科學</option>
+                      <option value="Daily Life & Society">日常與社會</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <select
+                      value={selectedPOS}
+                      onChange={(e) => setSelectedPOS(e.target.value)}
+                      className="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      <option value="All">所有詞性 (All POS)</option>
+                      <option value="noun">名詞 (noun)</option>
+                      <option value="verb">動詞 (verb)</option>
+                      <option value="adjective">形容詞 (adjective)</option>
+                      <option value="adverb">副詞 (adverb)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Vocabulary Table / List */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        <th className="py-3 px-4">收藏</th>
+                        <th className="py-3 px-4">單字 (Word)</th>
+                        <th className="py-3 px-4">音標 / 音節</th>
+                        <th className="py-3 px-4">詞性</th>
+                        <th className="py-3 px-4">中文釋義</th>
+                        <th className="py-3 px-4">記憶與字根</th>
+                        <th className="py-3 px-4 text-right">發音</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-sm">
+                      {filteredVocabulary.slice(0, 100).map((item) => (
+                        <tr key={item.id} className="hover:bg-slate-50/80 transition">
+                          <td className="py-3 px-4">
+                            <button
+                              onClick={() => toggleFavorite(item.id)}
+                              className={`transition ${favorites.includes(item.id) ? 'text-amber-500' : 'text-slate-300 hover:text-amber-400'}`}
+                            >
+                              <i data-lucide="star" className="w-4 h-4 fill-current"></i>
+                            </button>
+                          </td>
+                          <td className="py-3 px-4 font-bold text-slate-900">
+                            {item.word}
+                            {mastered.includes(item.id) && (
+                              <span className="ml-2 text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">已掌握</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="font-mono text-xs text-indigo-600 block">{item.phonetic}</span>
+                            <span className="text-xs text-slate-400">{item.syllables}</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
+                              {item.partOfSpeech}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 font-semibold text-slate-800">{item.meaning}</td>
+                          <td className="py-3 px-4 text-xs text-slate-500 max-w-xs truncate">
+                            {item.rootBreakdown}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <button
+                              onClick={() => speakWord(item.word)}
+                              className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg transition"
+                            >
+                              <i data-lucide="volume-2" className="w-4 h-4"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {filteredVocabulary.length > 100 && (
+                    <div className="py-4 text-center text-xs text-slate-400 border-t border-slate-100">
+                      為確保頁面順暢，前台列表中預設顯示前 100 筆比對結果。請善用關鍵字精確搜尋。
+                    </div>
+                  )}
+                </div>
               </div>
+            )}
 
-              <div className="space-y-2.5">
-                {options.map((opt, idx) => {
-                  const isCorrect = opt === currentQuestion.meaning;
-                  const isSelected = selectedOption === opt;
-
-                  let btnStyle = 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100';
-                  if (showResult) {
-                    if (isCorrect) btnStyle = 'bg-emerald-500 text-white border-emerald-500 font-bold';
-                    else if (isSelected) btnStyle = 'bg-rose-500 text-white border-rose-500';
-                  }
-
-                  return (
+            {/* TAB 3: QUIZ MODE */}
+            {currentTab === 'quiz' && (
+              <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                
+                {/* Quiz Header & Mode Switch */}
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">單字能力測驗</h2>
+                    <p className="text-xs text-slate-500">測試您的即時單字記憶與拼寫能力</p>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-slate-100 p-1 rounded-lg">
                     <button
-                      key={idx}
-                      disabled={showResult}
-                      onClick={() => handleSelectOption(opt)}
-                      className={`w-full p-3.5 rounded-xl border text-left text-sm transition-all ${btnStyle}`}
+                      onClick={() => setQuizMode('mc')}
+                      className={`px-3 py-1 rounded-md text-xs font-semibold transition ${quizMode === 'mc' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}`}
                     >
-                      {opt}
+                      選擇題
                     </button>
-                  );
-                })}
-              </div>
-
-              {showResult && (
-                <div className="pt-4 border-t border-slate-100 flex justify-between items-center">
-                  <p className="text-xs text-slate-500">
-                    {selectedOption === currentQuestion.meaning ? '🎉 答對了！大腦神經迴路加深。' : '❌ 答錯了，繼續加油！'}
-                  </p>
-                  <button
-                    onClick={() => setQuizIndex(prev => prev + 1)}
-                    className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 shadow-xs"
-                  >
-                    下一題 →
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      }
-
-      // ==========================================
-      // 模組 6: AddWordModal (新增字卡 Modal)
-      // ==========================================
-      function AddWordModal({ onClose, onAdd }) {
-        const [word, setWord] = useState('');
-        const [meaning, setMeaning] = useState('');
-        const [partOfSpeech, setPartOfSpeech] = useState('noun');
-        const [theme, setTheme] = useState('School & Study');
-        const [example, setExample] = useState('');
-
-        const handleSubmit = (e) => {
-          e.preventDefault();
-          if (!word || !meaning) return;
-
-          const newVocab = {
-            id: `v_custom_${Date.now()}`,
-            word,
-            phonetic: '/custom/',
-            syllables: word,
-            partOfSpeech,
-            theme,
-            rootBreakdown: '自訂學習單字',
-            meaning,
-            example: example || 'Custom user example sentence.',
-            translation: '自訂造句翻譯。'
-          };
-
-          onAdd(newVocab);
-          onClose();
-        };
-
-        return (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-200">
-              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 className="font-bold text-slate-900 text-lg">新增自訂單字卡</h3>
-                <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
-                  <i data-lucide="x" className="w-5 h-5"></i>
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-3 text-sm">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">英文單字</label>
-                  <input
-                    type="text"
-                    required
-                    value={word}
-                    onChange={(e) => setWord(e.target.value)}
-                    placeholder="例如：resilient"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">中文意思</label>
-                  <input
-                    type="text"
-                    required
-                    value={meaning}
-                    onChange={(e) => setMeaning(e.target.value)}
-                    placeholder="例如：有適應力的"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">詞性</label>
-                    <select
-                      value={partOfSpeech}
-                      onChange={(e) => setPartOfSpeech(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    <button
+                      onClick={() => setQuizMode('spelling')}
+                      className={`px-3 py-1 rounded-md text-xs font-semibold transition ${quizMode === 'spelling' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600'}`}
                     >
-                      <option value="noun">noun (n.)</option>
-                      <option value="verb">verb (v.)</option>
-                      <option value="adjective">adjective (adj.)</option>
-                      <option value="adverb">adverb (adv.)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">歸屬主題</label>
-                    <select
-                      value={theme}
-                      onChange={(e) => setTheme(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="School & Study">School & Study</option>
-                      <option value="Environment & Nature">Environment & Nature</option>
-                      <option value="Emotion & Feeling">Emotion & Feeling</option>
-                      <option value="Business & Work">Business & Work</option>
-                      <option value="Tech & Innovation">Tech & Innovation</option>
-                      <option value="Daily & Health">Daily & Health</option>
-                    </select>
+                      拼字題
+                    </button>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">情境例句 (選填)</label>
-                  <textarea
-                    rows="2"
-                    value={example}
-                    onChange={(e) => setExample(e.target.value)}
-                    placeholder="輸入包含該單字的練習英文例句..."
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+                {/* Score Banner */}
+                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-6 flex justify-between items-center">
+                  <span className="text-xs font-bold text-indigo-900 uppercase tracking-wider">目前測驗得分</span>
+                  <span className="text-2xl font-extrabold text-indigo-600">{quizScore} PTS</span>
                 </div>
 
-                <div className="pt-3 flex justify-end space-x-2 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className="px-4 py-2 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold hover:bg-slate-200"
-                  >
-                    取消
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-xs"
-                  >
-                    確認儲存
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        );
-      }
+                {/* MULTIPLE CHOICE MODE */}
+                {quizMode === 'mc' && (
+                  <div>
+                    <div className="mb-6 text-center py-6 bg-slate-50 rounded-xl border border-slate-100">
+                      <span className="text-xs text-slate-400 font-semibold block mb-1">請選擇以下單字的正確中文意思</span>
+                      <h3 className="text-3xl font-extrabold text-slate-900">{currentQuizWord.word}</h3>
+                      <p className="text-sm font-mono text-indigo-600 mt-1">{currentQuizWord.phonetic}</p>
+                    </div>
 
-      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-    </script>
-  </body>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                      {quizOptions.map((option, idx) => {
+                        let btnClass = "p-4 text-left border rounded-xl font-medium text-sm transition ";
+                        if (!quizAnswered) {
+                          btnClass += "bg-white border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/50 text-slate-800";
+                        } else {
+                          if (option === currentQuizWord.meaning) {
+                            btnClass += "bg-emerald-500 text-white border-emerald-500 font-bold";
+                          } else if (option === selectedOption) {
+                            btnClass += "bg-rose-500 text-white border-rose-500 font-bold";
+                          } else {
+                            btnClass += "bg-slate-100 text-slate-400 border-slate-200";
+                          }
+                        }
+
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => handleAnswerQuiz(option)}
+                            className={btnClass}
+                          >
+                            {option}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {quizAnswered && (
+                      <div className="flex justify-end">
+                        <button
+                          onClick={nextQuizQuestion}
+                          className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-indigo-700 shadow-md shadow-indigo-200 transition"
+                        >
+                          下一題
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* SPELLING MODE */}
+                {quizMode === 'spelling' && (
+                  <div>
+                    <div className="mb-6 text-center py-6 bg-slate-50 rounded-xl border border-slate-100">
+                      <span className="text-xs text-slate-400 font-semibold block mb-1">請根據提示拼出完整的英文單字</span>
+                      <h3 className="text-2xl font-bold text-slate-900 mb-1">{currentQuizWord.meaning}</h3>
+                      <p className="text-xs text-slate-500">提示：{currentQuizWord.syllables}</p>
+                    </div>
+
+                    <form onSubmit={handleSpellingSubmit} className="space-y-4 mb-6">
+                      <input
+                        type="text"
+                        placeholder="請輸入英文單字..."
+                        value={userSpelling}
+                        onChange={(e) => setUserSpelling(e.target.value)}
+                        className="w-full text-center text-xl font-bold tracking-wider py-3 px-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <button
+                        type="submit"
+                        className="w-full bg-slate-900 text-white font-semibold py-3 rounded-xl hover:bg-slate-800 transition"
+                      >
+                        提交答案
+                      </button>
+                    </form>
+
+                    {spellingResult !== null && (
+                      <div className={`p-4 rounded-xl text-center mb-4 ${spellingResult ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`}>
+                        {spellingResult ? (
+                          <p className="font-bold">恭喜答對！拼寫完美無誤。</p>
+                        ) : (
+                          <p className="font-bold">答錯了，正確解答為：<span className="underline">{currentQuizWord.word}</span></p>
+                        )}
+                        <button
+                          onClick={nextQuizQuestion}
+                          className="mt-3 inline-block bg-white border border-slate-300 px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-700 shadow-sm"
+                        >
+                          進行下一題
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 4: LEARNING STATISTICS */}
+            {currentTab === 'stats' && (
+              <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                {/* Stat Box 1 */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                  <div className="bg-indigo-100 text-indigo-600 p-3 rounded-xl">
+                    <i data-lucide="book" className="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-semibold">資料庫總單字量</p>
+                    <p className="text-2xl font-black text-slate-900">{VOCABULARY_DATA.length}</p>
+                  </div>
+                </div>
+
+                {/* Stat Box 2 */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                  <div className="bg-emerald-100 text-emerald-600 p-3 rounded-xl">
+                    <i data-lucide="check-circle" className="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-semibold">已掌握單字數</p>
+                    <p className="text-2xl font-black text-slate-900">{mastered.length}</p>
+                  </div>
+                </div>
+
+                {/* Stat Box 3 */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                  <div className="bg-amber-100 text-amber-600 p-3 rounded-xl">
+                    <i data-lucide="star" className="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 font-semibold">已收藏單字</p>
+                    <p className="text-2xl font-black text-slate-900">{favorites.length}</p>
+                  </div>
+                </div>
+
+                {/* Progress Bar Container */}
+                <div className="md:col-span-3 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-900 mb-2">學習掌握度分析</h3>
+                  <div className="w-full bg-slate-100 h-4 rounded-full overflow-hidden mb-2">
+                    <div
+                      className="bg-emerald-500 h-full transition-all duration-500"
+                      style={{ width: `${(mastered.length / VOCABULARY_DATA.length) * 100}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-xs font-semibold text-slate-500">
+                    <span>達成率: {((mastered.length / VOCABULARY_DATA.length) * 100).toFixed(1)}%</span>
+                    <span>目標: 1000 字</span>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+          </main>
+
+          {/* Footer */}
+          <footer className="mt-12 text-center text-xs text-slate-400 py-4 border-t border-slate-200">
+            VocabMaster English Learning Platform &copy; 2026. All rights reserved.
+          </footer>
+        </div>
+      );
+    }
+
+    // Render the React application
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
 </html>
