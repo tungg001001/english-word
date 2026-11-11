@@ -100,7 +100,7 @@
 
       // --- Emotion & Feeling ---
       { id: 'v11', word: 'empathy', phonetic: '/ˈem.pə.θi/', syllables: 'em · pa · thy', partOfSpeech: 'noun', theme: 'Emotion & Feeling', rootBreakdown: 'em- (進入) + pathy (感情)', meaning: '同理心、共鳴', example: 'Showing empathy towards others builds stronger social bonds.', translation: '對他人展現同理心能建立更堅固的社交紐帶。', synonyms: ['compassion', 'sympathy'], antonyms: ['apathy'], memoryTrick: 'em (進去) + pathy (感受) ➔ 走進別人的感受即「同理心」。' },
-      { id: 'v12', word: 'resilient', phonetic: '/rɪˈzɪl.jənt/', syllables: 're · sil · ient', partOfSpeech: 're- (再) + sili (跳) + -ent', theme: 'Emotion & Feeling', rootBreakdown: 're- (重新) + sili (跳躍)', meaning: '有韌性的、能迅速復原的', example: 'She is a resilient person who bounces back from setbacks.', translation: '她是一個非常有韌性的人，能迅速從挫折中反彈復原。', synonyms: ['adaptable', 'tough'], antonyms: ['vulnerable', 'fragile'], memoryTrick: 're (再) + sili (彈起) ➔ 打倒後能再度彈起。' },
+      { id: 'v12', word: 'resilient', phonetic: '/rɪˈzɪl.jənt/', syllables: 're · sil · ient', partOfSpeech: 'adjective', theme: 'Emotion & Feeling', rootBreakdown: 're- (重新) + sili (跳躍)', meaning: '有韌性的、能迅速復原的', example: 'She is a resilient person who bounces back from setbacks.', translation: '她是一個非常有韌性的人，能迅速從挫折中反彈復原。', synonyms: ['adaptable', 'tough'], antonyms: ['vulnerable', 'fragile'], memoryTrick: 're (再) + sili (彈起) ➔ 打倒後能再度彈起。' },
       { id: 'v13', word: 'optimistic', phonetic: '/ˌɑːp.təˈmɪs.tɪk/', syllables: 'op · ti · mis · tic', partOfSpeech: 'adjective', theme: 'Emotion & Feeling', rootBreakdown: 'opti (最佳) + -mistic', meaning: '樂觀的', example: 'He maintains an optimistic view about his future career.', translation: '他對自己未來的職涯保持著樂觀的態度。', synonyms: ['hopeful', 'positive'], antonyms: ['pessimistic'], memoryTrick: 'opt (選擇) + best ➔ 總是看好的一面。' },
 
       // --- Business & Work ---
@@ -122,7 +122,6 @@
         'School & Study', 'Environment & Nature', 'Emotion & Feeling',
         'Business & Work', 'Technology & Science', 'Daily Life & Society'
       ];
-      const parts = ['noun', 'verb', 'adjective', 'adverb'];
       
       const prefixes = [
         { pre: 'pro', mean: '向前/支持' }, { pre: 're', mean: '再次/重新' },
@@ -206,7 +205,7 @@
       });
 
       // Quiz State
-      const [quizMode, setQuizMode] = useState('mc'); // mc (multiple choice), spelling, match
+      const [quizMode, setQuizMode] = useState('mc'); // mc (multiple choice), spelling
       const [quizIndex, setQuizIndex] = useState(0);
       const [quizScore, setQuizScore] = useState(0);
       const [quizAnswered, setQuizAnswered] = useState(false);
@@ -230,10 +229,11 @@
         }
       });
 
-      // Text to Speech
-      const speakWord = (text, rate = 1) => {
+      // Universal Text to Speech function for any English string
+      const speakText = (text, rate = 1) => {
+        if (!text) return;
         if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel(); // Stop current speech
+          window.speechSynthesis.cancel(); // Stop current playing audio
           const utterance = new SpeechSynthesisUtterance(text);
           utterance.lang = 'en-US';
           utterance.rate = rate;
@@ -334,7 +334,7 @@
                 <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                   VocabMaster <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">1000 Core Words</span>
                 </h1>
-                <p className="text-xs text-slate-500">自然拼讀與核心單字高效記憶系統</p>
+                <p className="text-xs text-slate-500">自然拼讀與核心單字高效記憶系統（全英文發音支援）</p>
               </div>
             </div>
 
@@ -415,7 +415,7 @@
 
                 {/* Interactive Flip Flashcard */}
                 {filteredVocabulary.length > 0 ? (
-                  <div className="w-full h-[420px] perspective-1000 mb-6">
+                  <div className="w-full h-[450px] perspective-1000 mb-6">
                     <div
                       onClick={() => setIsFlipped(!isFlipped)}
                       className={`relative w-full h-full duration-500 transform-style-3d cursor-pointer rounded-3xl shadow-xl border border-slate-100 bg-white transition-transform ${
@@ -425,9 +425,15 @@
                       {/* FRONT FACE */}
                       <div className="absolute inset-0 w-full h-full backface-hidden p-8 flex flex-col justify-between rounded-3xl bg-gradient-to-br from-white to-indigo-50/30">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold tracking-wider uppercase bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full">
-                            {currentWord.theme}
-                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); speakText(currentWord.theme); }}
+                            className="text-xs font-bold tracking-wider uppercase bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-full flex items-center gap-1 transition"
+                            title="朗讀主題英文"
+                          >
+                            <span>{currentWord.theme}</span>
+                            <i data-lucide="volume-2" className="w-3 h-3"></i>
+                          </button>
+
                           <button
                             onClick={(e) => { e.stopPropagation(); toggleFavorite(currentWord.id); }}
                             className={`p-2 rounded-full transition ${favorites.includes(currentWord.id) ? 'text-amber-500 bg-amber-50' : 'text-slate-300 hover:text-amber-500'}`}
@@ -437,25 +443,38 @@
                         </div>
 
                         <div className="text-center my-auto">
-                          <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-2">
-                            {currentWord.word}
-                          </h2>
-                          <p className="text-lg font-mono text-indigo-600 mb-3">{currentWord.phonetic}</p>
-                          <p className="text-sm text-slate-500 font-medium tracking-wide">
-                            拼讀拆解：<span className="text-slate-700 font-semibold">{currentWord.syllables}</span>
-                          </p>
+                          <div className="flex items-center justify-center space-x-2">
+                            <h2 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mb-1">
+                              {currentWord.word}
+                            </h2>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); speakText(currentWord.word); }}
+                              className="p-1.5 rounded-full text-indigo-600 hover:bg-indigo-100 transition"
+                              title="點擊朗讀單字"
+                            >
+                              <i data-lucide="volume-2" className="w-6 h-6"></i>
+                            </button>
+                          </div>
+                          
+                          <p className="text-lg font-mono text-indigo-600 mb-2">{currentWord.phonetic}</p>
+                          
+                          <div className="inline-flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-lg transition" onClick={(e) => { e.stopPropagation(); speakText(currentWord.syllables.replace(/·/g, '')); }}>
+                            <span className="text-xs text-slate-500 font-medium">拼讀拆解：</span>
+                            <span className="text-sm text-slate-700 font-semibold">{currentWord.syllables}</span>
+                            <i data-lucide="volume-2" className="w-3.5 h-3.5 text-indigo-500"></i>
+                          </div>
 
                           {/* Audio Controls */}
                           <div className="flex justify-center gap-3 mt-4">
                             <button
-                              onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word, 1); }}
+                              onClick={(e) => { e.stopPropagation(); speakText(currentWord.word, 1); }}
                               className="inline-flex items-center space-x-1.5 bg-indigo-600 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-indigo-700 transition shadow-md shadow-indigo-200"
                             >
                               <i data-lucide="volume-2" className="w-4 h-4"></i>
-                              <span>美式標音</span>
+                              <span>標準發音</span>
                             </button>
                             <button
-                              onClick={(e) => { e.stopPropagation(); speakWord(currentWord.word, 0.65); }}
+                              onClick={(e) => { e.stopPropagation(); speakText(currentWord.word, 0.65); }}
                               className="inline-flex items-center space-x-1.5 bg-slate-100 text-slate-700 px-3 py-2 rounded-full text-xs font-semibold hover:bg-slate-200 transition"
                             >
                               <i data-lucide="turtle" className="w-4 h-4"></i>
@@ -474,22 +493,46 @@
                       <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 p-8 flex flex-col justify-between rounded-3xl bg-slate-900 text-white">
                         <div className="flex justify-between items-center border-b border-slate-800 pb-3">
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs font-bold uppercase bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-md border border-indigo-500/30">
-                              {currentWord.partOfSpeech}
-                            </span>
-                            <span className="text-sm font-semibold text-slate-300">{currentWord.word}</span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); speakText(currentWord.partOfSpeech); }}
+                              className="text-xs font-bold uppercase bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 px-2.5 py-1 rounded-md border border-indigo-500/30 flex items-center space-x-1 transition"
+                              title="朗讀詞性"
+                            >
+                              <span>{currentWord.partOfSpeech}</span>
+                              <i data-lucide="volume-2" className="w-3 h-3"></i>
+                            </button>
+                            
+                            <div className="flex items-center space-x-1">
+                              <span className="text-base font-semibold text-slate-200">{currentWord.word}</span>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); speakText(currentWord.word); }}
+                                className="text-indigo-400 hover:text-indigo-300 p-1"
+                                title="朗讀單字"
+                              >
+                                <i data-lucide="volume-2" className="w-4 h-4"></i>
+                              </button>
+                            </div>
                           </div>
                           <span className="text-xl font-bold text-amber-400">{currentWord.meaning}</span>
                         </div>
 
                         <div className="space-y-3 my-auto text-xs sm:text-sm">
                           <div>
-                            <p className="text-slate-400 text-xs font-semibold">【字根解析 Root Breakdown】</p>
-                            <p className="text-slate-200 font-medium mt-0.5">{currentWord.rootBreakdown}</p>
+                            <div className="flex items-center justify-between mb-0.5">
+                              <p className="text-slate-400 text-xs font-semibold">【字根解析 Root Breakdown】</p>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); speakText(currentWord.rootBreakdown); }}
+                                className="text-indigo-400 hover:text-indigo-300 text-xs flex items-center space-x-1 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/60 transition"
+                              >
+                                <i data-lucide="volume-2" className="w-3 h-3"></i>
+                                <span>字根發音</span>
+                              </button>
+                            </div>
+                            <p className="text-slate-200 font-medium">{currentWord.rootBreakdown}</p>
                           </div>
 
                           <div>
-                            <p className="text-slate-400 text-xs font-semibold">【記憶卡聯想 Memory Trick】</p>
+                            <p className="text-slate-400 text-xs font-semibold">【記憶聯想 Memory Trick】</p>
                             <p className="text-amber-200/90 font-medium mt-0.5">{currentWord.memoryTrick}</p>
                           </div>
 
@@ -497,21 +540,46 @@
                             <div className="flex items-center justify-between mb-0.5">
                               <p className="text-slate-400 text-xs font-semibold">【例句應用 Example】</p>
                               <button
-                                onClick={(e) => { e.stopPropagation(); speakWord(currentWord.example, 0.9); }}
-                                className="flex items-center space-x-1 text-xs text-indigo-400 hover:text-indigo-300 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-800 px-2.5 py-1 rounded-lg transition"
+                                onClick={(e) => { e.stopPropagation(); speakText(currentWord.example, 0.9); }}
+                                className="flex items-center space-x-1 text-xs text-indigo-300 hover:text-white bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1 rounded-lg transition shadow-sm"
                               >
                                 <i data-lucide="volume-2" className="w-3.5 h-3.5"></i>
                                 <span>例句發音</span>
                               </button>
                             </div>
-                            <p className="text-slate-200 italic mt-0.5">"{currentWord.example}"</p>
+                            <p className="text-slate-100 italic font-medium mt-0.5">"{currentWord.example}"</p>
                             <p className="text-slate-400 mt-0.5">{currentWord.translation}</p>
                           </div>
                         </div>
 
-                        <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-                          <span>同義: {currentWord.synonyms.join(', ') || '無'}</span>
-                          <span>反義: {currentWord.antonyms.join(', ') || '無'}</span>
+                        <div className="pt-2 border-t border-slate-800 flex flex-wrap justify-between items-center text-xs text-slate-400 gap-2">
+                          <div className="flex items-center space-x-1">
+                            <span>同義:</span>
+                            {currentWord.synonyms.map((syn, i) => (
+                              <button
+                                key={i}
+                                onClick={(e) => { e.stopPropagation(); speakText(syn); }}
+                                className="hover:text-indigo-300 underline underline-offset-2 flex items-center space-x-0.5"
+                              >
+                                <span>{syn}</span>
+                                <i data-lucide="volume-2" className="w-2.5 h-2.5"></i>
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <div className="flex items-center space-x-1">
+                            <span>反義:</span>
+                            {currentWord.antonyms.map((ant, i) => (
+                              <button
+                                key={i}
+                                onClick={(e) => { e.stopPropagation(); speakText(ant); }}
+                                className="hover:text-indigo-300 underline underline-offset-2 flex items-center space-x-0.5"
+                              >
+                                <span>{ant}</span>
+                                <i data-lucide="volume-2" className="w-2.5 h-2.5"></i>
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -614,7 +682,7 @@
                         <th className="py-3 px-4">詞性</th>
                         <th className="py-3 px-4">中文釋義</th>
                         <th className="py-3 px-4">記憶與字根</th>
-                        <th className="py-3 px-4 text-right">發音</th>
+                        <th className="py-3 px-4 text-right">例句發音</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-sm">
@@ -629,28 +697,65 @@
                             </button>
                           </td>
                           <td className="py-3 px-4 font-bold text-slate-900">
-                            {item.word}
+                            <div className="flex items-center space-x-1.5">
+                              <span>{item.word}</span>
+                              <button
+                                onClick={() => speakText(item.word)}
+                                className="text-indigo-500 hover:text-indigo-700"
+                                title="單字朗讀"
+                              >
+                                <i data-lucide="volume-1" className="w-3.5 h-3.5"></i>
+                              </button>
+                            </div>
                             {mastered.includes(item.id) && (
-                              <span className="ml-2 text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium">已掌握</span>
+                              <span className="mt-0.5 text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-medium inline-block">已掌握</span>
                             )}
                           </td>
                           <td className="py-3 px-4">
-                            <span className="font-mono text-xs text-indigo-600 block">{item.phonetic}</span>
-                            <span className="text-xs text-slate-400">{item.syllables}</span>
+                            <div className="flex items-center space-x-1">
+                              <span className="font-mono text-xs text-indigo-600">{item.phonetic}</span>
+                              <button
+                                onClick={() => speakText(item.word, 0.7)}
+                                className="text-slate-400 hover:text-indigo-600"
+                                title="慢速朗讀"
+                              >
+                                <i data-lucide="turtle" className="w-3 h-3"></i>
+                              </button>
+                            </div>
+                            <button 
+                              onClick={() => speakText(item.syllables.replace(/·/g, ''))}
+                              className="text-xs text-slate-400 hover:text-slate-700 flex items-center space-x-1"
+                              title="拼讀音節發音"
+                            >
+                              <span>{item.syllables}</span>
+                              <i data-lucide="volume-2" className="w-2.5 h-2.5"></i>
+                            </button>
                           </td>
                           <td className="py-3 px-4">
-                            <span className="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
-                              {item.partOfSpeech}
-                            </span>
+                            <button
+                              onClick={() => speakText(item.partOfSpeech)}
+                              className="text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-600 px-2 py-0.5 rounded flex items-center space-x-1 transition"
+                            >
+                              <span>{item.partOfSpeech}</span>
+                              <i data-lucide="volume-2" className="w-2.5 h-2.5"></i>
+                            </button>
                           </td>
                           <td className="py-3 px-4 font-semibold text-slate-800">{item.meaning}</td>
                           <td className="py-3 px-4 text-xs text-slate-500 max-w-xs truncate">
-                            {item.rootBreakdown}
+                            <button 
+                              onClick={() => speakText(item.rootBreakdown)}
+                              className="hover:text-indigo-600 text-left flex items-center space-x-1"
+                              title="朗讀字根"
+                            >
+                              <span className="truncate">{item.rootBreakdown}</span>
+                              <i data-lucide="volume-2" className="w-3 h-3 flex-shrink-0"></i>
+                            </button>
                           </td>
                           <td className="py-3 px-4 text-right">
                             <button
-                              onClick={() => speakWord(item.word)}
+                              onClick={() => speakText(item.example)}
                               className="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg transition"
+                              title="朗讀完整例句"
                             >
                               <i data-lucide="volume-2" className="w-4 h-4"></i>
                             </button>
@@ -706,7 +811,16 @@
                   <div>
                     <div className="mb-6 text-center py-6 bg-slate-50 rounded-xl border border-slate-100">
                       <span className="text-xs text-slate-400 font-semibold block mb-1">請選擇以下單字的正確中文意思</span>
-                      <h3 className="text-3xl font-extrabold text-slate-900">{currentQuizWord.word}</h3>
+                      <div className="flex items-center justify-center space-x-2">
+                        <h3 className="text-3xl font-extrabold text-slate-900">{currentQuizWord.word}</h3>
+                        <button
+                          onClick={() => speakText(currentQuizWord.word)}
+                          className="bg-indigo-100 p-2 rounded-full text-indigo-600 hover:bg-indigo-200 transition"
+                          title="聽題目發音"
+                        >
+                          <i data-lucide="volume-2" className="w-5 h-5"></i>
+                        </button>
+                      </div>
                       <p className="text-sm font-mono text-indigo-600 mt-1">{currentQuizWord.phonetic}</p>
                     </div>
 
@@ -756,37 +870,60 @@
                     <div className="mb-6 text-center py-6 bg-slate-50 rounded-xl border border-slate-100">
                       <span className="text-xs text-slate-400 font-semibold block mb-1">請根據提示拼出完整的英文單字</span>
                       <h3 className="text-2xl font-bold text-slate-900 mb-1">{currentQuizWord.meaning}</h3>
-                      <p className="text-xs text-slate-500">提示：{currentQuizWord.syllables}</p>
+                      <div className="flex items-center justify-center space-x-2 text-xs text-slate-500">
+                        <button 
+                          onClick={() => speakText(currentQuizWord.syllables.replace(/·/g, ''))}
+                          className="hover:text-indigo-600 flex items-center space-x-1"
+                          title="聽拼讀音節"
+                        >
+                          <span>提示：{currentQuizWord.syllables}</span>
+                          <i data-lucide="volume-2" className="w-3 h-3"></i>
+                        </button>
+
+                        <button
+                          onClick={() => speakText(currentQuizWord.word)}
+                          className="text-indigo-600 hover:text-indigo-800 flex items-center space-x-0.5 ml-2"
+                          title="聽單字語音"
+                        >
+                          <i data-lucide="volume-2" className="w-3.5 h-3.5"></i>
+                          <span>聽發音</span>
+                        </button>
+                      </div>
                     </div>
 
                     <form onSubmit={handleSpellingSubmit} className="space-y-4 mb-6">
-                      <input
-                        type="text"
-                        placeholder="請輸入英文單字..."
-                        value={userSpelling}
-                        onChange={(e) => setUserSpelling(e.target.value)}
-                        className="w-full text-center text-xl font-bold tracking-wider py-3 px-4 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                      <button
-                        type="submit"
-                        className="w-full bg-slate-900 text-white font-semibold py-3 rounded-xl hover:bg-slate-800 transition"
-                      >
-                        提交答案
-                      </button>
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="請在此輸入英文單字..."
+                          value={userSpelling}
+                          onChange={(e) => setUserSpelling(e.target.value)}
+                          disabled={spellingResult !== null}
+                          className="w-full text-center text-xl font-bold py-3 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        />
+                      </div>
+
+                      {spellingResult === null ? (
+                        <button
+                          type="submit"
+                          className="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 transition"
+                        >
+                          驗證答案
+                        </button>
+                      ) : (
+                        <div className={`p-4 rounded-xl text-center font-bold text-sm ${spellingResult ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+                          {spellingResult ? '🎉 回答正確！加 15 分' : `❌ 拼寫錯誤！正確單字為：${currentQuizWord.word}`}
+                        </div>
+                      )}
                     </form>
 
                     {spellingResult !== null && (
-                      <div className={`p-4 rounded-xl text-center mb-4 ${spellingResult ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`}>
-                        {spellingResult ? (
-                          <p className="font-bold">恭喜答對！拼寫完美無誤。</p>
-                        ) : (
-                          <p className="font-bold">答錯了，正確解答為：<span className="underline">{currentQuizWord.word}</span></p>
-                        )}
+                      <div className="flex justify-end">
                         <button
                           onClick={nextQuizQuestion}
-                          className="mt-3 inline-block bg-white border border-slate-300 px-4 py-1.5 rounded-lg text-xs font-semibold text-slate-700 shadow-sm"
+                          className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-indigo-700 shadow-md shadow-indigo-200 transition"
                         >
-                          進行下一題
+                          下一題
                         </button>
                       </div>
                     )}
@@ -795,72 +932,48 @@
               </div>
             )}
 
-            {/* TAB 4: LEARNING STATISTICS */}
+            {/* TAB 4: STATS */}
             {currentTab === 'stats' && (
-              <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                {/* Stat Box 1 */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                  <div className="bg-indigo-100 text-indigo-600 p-3 rounded-xl">
-                    <i data-lucide="book" className="w-6 h-6"></i>
+              <div className="max-w-3xl mx-auto space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <span className="text-xs text-slate-400 font-semibold block uppercase">總詞庫量</span>
+                    <span className="text-3xl font-extrabold text-slate-900 mt-1 block">{VOCABULARY_DATA.length}</span>
                   </div>
-                  <div>
-                    <p className="text-xs text-slate-500 font-semibold">資料庫總單字量</p>
-                    <p className="text-2xl font-black text-slate-900">{VOCABULARY_DATA.length}</p>
+
+                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <span className="text-xs text-slate-400 font-semibold block uppercase">已掌握單字</span>
+                    <span className="text-3xl font-extrabold text-emerald-600 mt-1 block">{mastered.length}</span>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
+                    <span className="text-xs text-slate-400 font-semibold block uppercase">已收藏星號</span>
+                    <span className="text-3xl font-extrabold text-amber-500 mt-1 block">{favorites.length}</span>
                   </div>
                 </div>
 
-                {/* Stat Box 2 */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                  <div className="bg-emerald-100 text-emerald-600 p-3 rounded-xl">
-                    <i data-lucide="check-circle" className="w-6 h-6"></i>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500 font-semibold">已掌握單字數</p>
-                    <p className="text-2xl font-black text-slate-900">{mastered.length}</p>
-                  </div>
-                </div>
-
-                {/* Stat Box 3 */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
-                  <div className="bg-amber-100 text-amber-600 p-3 rounded-xl">
-                    <i data-lucide="star" className="w-6 h-6"></i>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500 font-semibold">已收藏單字</p>
-                    <p className="text-2xl font-black text-slate-900">{favorites.length}</p>
-                  </div>
-                </div>
-
-                {/* Progress Bar Container */}
-                <div className="md:col-span-3 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-900 mb-2">學習掌握度分析</h3>
-                  <div className="w-full bg-slate-100 h-4 rounded-full overflow-hidden mb-2">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                  <h3 className="text-base font-bold text-slate-900 mb-4">掌握率分析</h3>
+                  <div className="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
                     <div
                       className="bg-emerald-500 h-full transition-all duration-500"
                       style={{ width: `${(mastered.length / VOCABULARY_DATA.length) * 100}%` }}
                     ></div>
                   </div>
-                  <div className="flex justify-between text-xs font-semibold text-slate-500">
-                    <span>達成率: {((mastered.length / VOCABULARY_DATA.length) * 100).toFixed(1)}%</span>
-                    <span>目標: 1000 字</span>
+                  <div className="flex justify-between items-center text-xs text-slate-500 mt-2 font-medium">
+                    <span>進度: {((mastered.length / VOCABULARY_DATA.length) * 100).toFixed(1)}%</span>
+                    <span>剩餘未掌握: {VOCABULARY_DATA.length - mastered.length} 字</span>
                   </div>
                 </div>
-
               </div>
             )}
 
           </main>
-
-          {/* Footer */}
-          <footer className="mt-12 text-center text-xs text-slate-400 py-4 border-t border-slate-200">
-            VocabMaster English Learning Platform &copy; 2026. All rights reserved.
-          </footer>
         </div>
       );
     }
 
-    // Render the React application
+    // Render Root
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
