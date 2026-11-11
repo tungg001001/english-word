@@ -518,16 +518,7 @@
 
                         <div className="space-y-3 my-auto text-xs sm:text-sm">
                           <div>
-                            <div className="flex items-center justify-between mb-0.5">
-                              <p className="text-slate-400 text-xs font-semibold">【字根解析 Root Breakdown】</p>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); speakText(currentWord.rootBreakdown); }}
-                                className="text-indigo-400 hover:text-indigo-300 text-xs flex items-center space-x-1 bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-800/60 transition"
-                              >
-                                <i data-lucide="volume-2" className="w-3 h-3"></i>
-                                <span>字根發音</span>
-                              </button>
-                            </div>
+                            <p className="text-slate-400 text-xs font-semibold mb-0.5">【字根解析 Root Breakdown】</p>
                             <p className="text-slate-200 font-medium">{currentWord.rootBreakdown}</p>
                           </div>
 
@@ -742,14 +733,7 @@
                           </td>
                           <td className="py-3 px-4 font-semibold text-slate-800">{item.meaning}</td>
                           <td className="py-3 px-4 text-xs text-slate-500 max-w-xs truncate">
-                            <button 
-                              onClick={() => speakText(item.rootBreakdown)}
-                              className="hover:text-indigo-600 text-left flex items-center space-x-1"
-                              title="朗讀字根"
-                            >
-                              <span className="truncate">{item.rootBreakdown}</span>
-                              <i data-lucide="volume-2" className="w-3 h-3 flex-shrink-0"></i>
-                            </button>
+                            <span className="truncate">{item.rootBreakdown}</span>
                           </td>
                           <td className="py-3 px-4 text-right">
                             <button
